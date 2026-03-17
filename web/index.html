@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="A new Flutter project.">
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="smart_home_animation">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>smart_home_animation</title>
+  <link rel="manifest" href="manifest.json">
+
+  <meta name="google-signin-client_id" content="1064395812800-jdsam4913s9kao9at05vq6hc7bkdhd87.apps.googleusercontent.com">
+</head>
+<body>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
+
+  <script>
+    // 3. إعدادات الفايربيز الخاصة بمشروعك
+    const firebaseConfig = {
+      apiKey: "AIzaSyAwtAcKbr2YFvAjGs8yJowqxBJDXIb-tC0",
+      authDomain: "smart-home-b6da7.firebaseapp.com",
+      databaseURL: "https://smart-home-b6da7-default-rtdb.firebaseio.com",
+      projectId: "smart-home-b6da7",
+      storageBucket: "smart-home-b6da7.firebasestorage.app",
+      messagingSenderId: "1064395812800",
+      appId: "1:1064395812800:web:0c3895374fe5798f83a225",
+      measurementId: "G-JG1W910Q4K"
+    };
+
+
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+  </script>
+
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
