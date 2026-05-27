@@ -1,0 +1,649 @@
+{
+  "project": "waffar_ly_app",
+  "analysisDate": "2026-05-21",
+  "firebaseProject": "smart-home-b6da7",
+  "summary": {
+    "status": "ARCHITECTURAL CONCERNS IDENTIFIED",
+    "featureModules": 3,
+    "duplicateFiles": 12,
+    "overlappingCubits": 3,
+    "overlapppingModels": 2,
+    "simulationToggleIssues": "CRITICAL - Not responding from dashboard"
+  },
+  "directoryStructure": {
+    "ai": {
+      "path": "lib/features/ai",
+      "structure": {
+        "cubit": {
+          "files": [
+            "ai_cubit.dart",
+            "ai_states.dart"
+          ],
+          "description": "Core AI result aggregation, watches simulator/hardware/real_device sources"
+        },
+        "data": {
+          "files": [
+            "ai_results_repository.dart"
+          ],
+          "description": "Repository layer for AI results from Firestore collections"
+        },
+        "models": {
+          "files": [
+            "ai_result.dart"
+          ],
+          "description": "AiResult model with severity enum and sanitization logic"
+        },
+        "widgets": {
+          "files": [
+            "ai_result_card.dart",
+            "ai_probability_gauge.dart",
+            "ai_severity_badge.dart"
+          ],
+          "description": "Display components for AI analysis UI"
+        }
+      },
+      "totalFiles": 7
+    },
+    "energy": {
+      "path": "lib/features/energy",
+      "structure": {
+        "cubit": {
+          "files": [
+            "energy_cubit.dart",
+            "energy_states.dart",
+            "ai_result_cubit.dart"
+          ],
+          "description": "Dual cubits: energy tracking and AI results from Firestore source"
+        },
+        "data": {
+          "files": [
+            "firestore_energy_data_source.dart"
+          ],
+          "description": "Data source for energy records and AI results from Firestore"
+        },
+        "models": {
+          "files": [
+            "ai_result_model.dart"
+          ],
+          "description": "AIResultModel class - DIFFERENT from ai/models/ai_result.dart"
+        },
+        "widgets": {
+          "files": [
+            "ai_status_card.dart",
+            "ai_dashboard_panel.dart",
+            "system_health_card.dart",
+            "energy_summary_card.dart",
+            "energy_chart_widget.dart",
+            "top_devices_chart_widget.dart",
+            "system_heatmap_panel.dart",
+            "energy_heatmap_panel.dart",
+            "device_rank_row.dart",
+            "room_energy_bar.dart",
+            "recommendation_panel.dart",
+            "probability_pie_chart.dart",
+            "probability_indicator.dart"
+          ],
+          "description": "Multiple energy visualization components"
+        },
+        "screens": {
+          "files": [
+            "Not found - likely routed via router"
+          ]
+        }
+      },
+      "totalFiles": 19
+    },
+    "ai_energy_dashboard": {
+      "path": "lib/features/ai_energy_dashboard",
+      "structure": {
+        "cubit": {
+          "files": [
+            "ai_energy_cubit.dart",
+            "ai_energy_state.dart"
+          ],
+          "description": "MERGED cubit combining AI + Energy data with sanitization"
+        },
+        "screens": {
+          "files": [
+            "ai_energy_dashboard_screen.dart"
+          ],
+          "description": "Primary dashboard screen using AiEnergyCubit"
+        },
+        "widgets": {
+          "files": [
+            "dashboard_app_bar.dart",
+            "dashboard_body.dart",
+            "dashboard_section_header.dart",
+            "dashboard_metrics.dart",
+            "ai_stat_card.dart",
+            "ai_source_panel.dart",
+            "system_health_banner.dart",
+            "anomaly_alert_card.dart",
+            "energy_snapshot_card.dart",
+            "power_by_room_card.dart",
+            "top_devices_card.dart"
+          ],
+          "description": "Dashboard-specific UI components"
+        }
+      },
+      "totalFiles": 14
+    }
+  },
+  "duplicateAnalysis": {
+    "fileNameDuplicates": [
+      {
+        "name": "ai_result files",
+        "locations": [
+          "lib/features/ai/models/ai_result.dart",
+          "lib/features/energy/models/ai_result_model.dart"
+        ],
+        "issue": "CRITICAL - TWO DIFFERENT MODEL CLASSES for AI results",
+        "ai_result_class": "AiResult with enum AiSeverity {normal, warning, danger, critical}",
+        "ai_result_model_class": "AIResultModel with enum AiDecision {normal, warning, danger, critical, anomaly}",
+        "impact": "Code duplication, maintenance nightmare, schema mapping inconsistencies"
+      },
+      {
+        "name": "AI Status Cards",
+        "locations": [
+          "lib/features/energy/widgets/ai_status_card.dart",
+          "lib/features/ai_energy_dashboard/widgets/ai_stat_card.dart"
+        ],
+        "difference": "ai_status_card shows loading state for AIResultModel, ai_stat_card is generic stat display",
+        "impact": "Different purposes but similar naming pattern"
+      },
+      {
+        "name": "System Health Cards",
+        "locations": [
+          "lib/features/energy/widgets/system_health_card.dart",
+          "lib/features/ai_energy_dashboard/widgets/system_health_banner.dart"
+        ],
+        "difference": "Both show temp/humidity/voltage/amperes/uptime metrics",
+        "overlap": "HIGH - nearly identical logic"
+      },
+      {
+        "name": "Energy/AI Dashboard Panels",
+        "locations": [
+          "lib/features/energy/widgets/ai_dashboard_panel.dart",
+          "lib/features/ai_energy_dashboard/widgets/ai_source_panel.dart"
+        ],
+        "difference": "Both display AI analysis results from Firestore",
+        "overlap": "MEDIUM - similar but different rendering strategies"
+      },
+      {
+        "name": "Visualization Components",
+        "duplicates": [
+          {
+            "component": "Probability Display",
+            "locations": [
+              "lib/features/energy/widgets/probability_pie_chart.dart",
+              "lib/features/energy/widgets/probability_indicator.dart",
+              "lib/features/ai/widgets/ai_probability_gauge.dart"
+            ]
+          },
+          {
+            "component": "Top Devices Display",
+            "locations": [
+              "lib/features/energy/widgets/top_devices_chart_widget.dart",
+              "lib/features/ai_energy_dashboard/widgets/top_devices_card.dart"
+            ]
+          },
+          {
+            "component": "Heatmap Display",
+            "locations": [
+              "lib/features/energy/widgets/system_heatmap_panel.dart",
+              "lib/features/energy/widgets/energy_heatmap_panel.dart"
+            ]
+          }
+        ]
+      }
+    ],
+    "totalDuplicateFiles": 12,
+    "affectedLines": "~2000+ lines of duplicated UI logic"
+  },
+  "overlappingFunctionality": {
+    "cubits": [
+      {
+        "name": "AiCubit",
+        "location": "lib/features/ai/cubit/ai_cubit.dart",
+        "responsibility": "Watch simulator + hardware + real_device AI results from Firestore",
+        "methods": [
+          "startListening() - subscribes to 3 streams",
+          "_sanitise() - prevents false anomalies",
+          "_recomputeSeverity() - recalculates severity based on watts/amps"
+        ],
+        "state": "AiLoaded { simulator, hardware, realDevice }"
+      },
+      {
+        "name": "EnergyCubit",
+        "location": "lib/features/energy/cubit/energy_cubit.dart",
+        "responsibility": "Watch device_states + AI results, compute energy metrics",
+        "methods": [
+          "loadEnergy() - dual stream subscription",
+          "updateRate() - update electricity rate",
+          "_emitFromRecords() - compute energy state"
+        ],
+        "state": "EnergyLoaded { records, totalKwh, topDevices, roomBreakdown }"
+      },
+      {
+        "name": "AiEnergyCubit",
+        "location": "lib/features/ai_energy_dashboard/cubit/ai_energy_cubit.dart",
+        "responsibility": "MERGED - combines AI analysis + energy data for dashboard",
+        "methods": [
+          "startListening() - subscribes to AI + energy streams",
+          "updateRate() - update electricity rate",
+          "_subscribeAi() - watch simulator + hardware",
+          "_subscribeEnergy() - watch device states",
+          "_sanitiseAiResult() - duplicate sanitization logic",
+          "_recomputeSeverity() - duplicate severity logic"
+        ],
+        "state": "AiEnergyLoaded { simulator, hardware, records, totalKwh, systemHealth }"
+      }
+    ],
+    "overlappingMethods": [
+      {
+        "method": "_sanitise / _sanitiseAiResult",
+        "present_in": ["AiCubit", "AiEnergyCubit"],
+        "duplicatedLines": 40,
+        "logic": "Prevents false anomalies when all electrical readings are zero"
+      },
+      {
+        "method": "_recomputeSeverity",
+        "present_in": ["AiCubit", "AiEnergyCubit"],
+        "duplicatedLines": 30,
+        "logic": "Converts watts/amperes to AiSeverity enum value"
+      },
+      {
+        "method": "_emitFromRecords / _tryEmit",
+        "present_in": ["EnergyCubit", "AiEnergyCubit"],
+        "duplicatedLines": 50,
+        "logic": "Transforms device states into UI states"
+      }
+    ],
+    "models": [
+      {
+        "name": "AiResult",
+        "location": "lib/features/ai/models/ai_result.dart",
+        "fields": [
+          "source: String",
+          "aiDecision: String",
+          "isAnomaly: bool",
+          "probAnomalyPct: int",
+          "probNormalPct: int",
+          "watts: double",
+          "amperes: double",
+          "voltage: double",
+          "kwhConsumed: double",
+          "costPerKwhEgp: double",
+          "costSoFarEgp: double",
+          "severity: AiSeverity (enum)"
+        ],
+        "factories": ["fromFirestore", "idle", "copyWithSeverity"],
+        "used_by": ["AiCubit", "AiEnergyCubit"]
+      },
+      {
+        "name": "AIResultModel",
+        "location": "lib/features/energy/models/ai_result_model.dart",
+        "fields": [
+          "aiDecision: AiDecision (enum)",
+          "watts: double",
+          "amperes: double",
+          "source: String",
+          "isAnomaly: bool",
+          "RTDB specific fields: liveWatts, currentBillEgp, predictedMonthlyBill"
+        ],
+        "factories": ["fromFirestore", "fromRtdb", "fromRtdbAiOutput", "_fromMap"],
+        "used_by": ["EnergyCubit", "AIResultCubit"],
+        "issue": "Has RTDB-specific logic (supposedly migrated to Firestore)"
+      }
+    ],
+    "dataSources": [
+      {
+        "name": "AiResultsRepository",
+        "location": "lib/features/ai/data/ai_results_repository.dart",
+        "methods": [
+          "watchSimulator()",
+          "watchHardware()",
+          "watchRealDeviceAiResults()",
+          "watchDeviceControl()",
+          "watchDeviceStates()"
+        ],
+        "returnTypes": "Map<String, dynamic>? for AI results"
+      },
+      {
+        "name": "FirestoreEnergyDataSource",
+        "location": "lib/features/energy/data/firestore_energy_data_source.dart",
+        "methods": [
+          "watchSimulator()",
+          "watchHardware()",
+          "watchRealDeviceAiResults()",
+          "watchDeviceStates()"
+        ],
+        "returnTypes": "AIResultModel? and List<EnergyRecord>",
+        "issue": "Duplicate methods from AiResultsRepository but different return types"
+      }
+    ]
+  },
+  "firebaseStructure": {
+    "project": "smart-home-b6da7",
+    "collections": {
+      "ai_results": {
+        "path": "ai_results/{documentId}",
+        "documents": [
+          {
+            "id": "simulator",
+            "schema": {
+              "aiDecision": "String (NORMAL|WARNING|DANGER|CRITICAL)",
+              "isAnomaly": "Boolean",
+              "probAnomalyPct": "Number (0-100)",
+              "probNormalPct": "Number (0-100)",
+              "recommendation": "String",
+              "watts": "Number",
+              "amperes": "Number",
+              "voltage": "Number",
+              "kwh_consumed": "Number",
+              "cost_per_kwh_egp": "Number (default: 1.25)",
+              "cost_so_far_egp": "Number",
+              "predicted_monthly_egp": "Number",
+              "humidity_pct": "Number",
+              "temperature_c": "Number",
+              "uptime_hours": "Number",
+              "last_update": "String (ISO 8601)"
+            },
+            "updated_by": ["Firestore function or external service"]
+          },
+          {
+            "id": "hardware",
+            "schema": "Identical to simulator"
+          },
+          {
+            "id": "Real_Device_01",
+            "schema": "Identical to simulator - live hardware device results"
+          }
+        ]
+      },
+      "device_states": {
+        "path": "device_states/{deviceId}",
+        "schema": {
+          "status": "String (ON|OFF)",
+          "watts": "Number",
+          "kwh": "Number",
+          "volts": "Number",
+          "amps": "Number",
+          "ai_status": "String (anomaly detection status)",
+          "recommendation": "String",
+          "last_updated": "Timestamp (server)"
+        },
+        "documents": [
+          "Light_Living_Room",
+          "Fan_Bedroom",
+          "AC_Study",
+          "TV_Entertainment",
+          "... (per kRoomDevices mapping)"
+        ],
+        "writtenBy": [
+          "toggleSimulation() in SimulationDeviceRepositoryImpl",
+          "toggleDevice() in DevicesCubit"
+        ]
+      },
+      "Control": {
+        "path": "Control/{deviceId}",
+        "documents": [
+          {
+            "id": "Real_Device_01",
+            "schema": {
+              "status": "String (ON|OFF)",
+              "last_updated": "Timestamp (server)"
+            }
+          }
+        ],
+        "writtenBy": "toggleDevice() in HardwareDeviceRepositoryImpl"
+      },
+      "Devices": {
+        "path": "Devices/{deviceId}",
+        "documents": [
+          {
+            "id": "Real_Device_01",
+            "schema": "Same as Control collection (legacy?)"
+          }
+        ],
+        "note": "Appears to be same as Control collection - consolidation needed"
+      }
+    },
+    "readFlows": [
+      {
+        "name": "AI Results Flow",
+        "source": "ai_results/{simulator|hardware|Real_Device_01}",
+        "readers": [
+          "AiResultsRepository.watchSimulator/watchHardware/watchRealDeviceAiResults",
+          "FirestoreEnergyDataSource.watchSimulator/watchHardware/watchRealDeviceAiResults"
+        ],
+        "consumers": ["AiCubit", "EnergyCubit", "AiEnergyCubit"]
+      },
+      {
+        "name": "Device States Flow",
+        "source": "device_states/{documentId}",
+        "readers": [
+          "AiResultsRepository.watchDeviceStates()",
+          "FirestoreEnergyDataSource.watchDeviceStates()",
+          "SimulationDeviceRepositoryImpl.watchSimDevices()"
+        ],
+        "consumers": ["EnergyCubit", "AiEnergyCubit", "DevicesCubit"]
+      },
+      {
+        "name": "Device Control Flow",
+        "source": "Control/Real_Device_01 or Devices/Real_Device_01",
+        "readers": [
+          "HardwareDeviceRepositoryImpl.watchDeviceControl()"
+        ],
+        "consumers": ["DevicesCubit"]
+      }
+    ],
+    "writeFlows": [
+      {
+        "name": "Simulation Toggle",
+        "trigger": "DeviceDetailSheet toggle switch",
+        "flow": [
+          "User toggles simulation switch in device_detail_sheet.dart",
+          "onSimToggle calls DevicesCubit.toggleSimulation(deviceId, newStatus)",
+          "DevicesCubit.toggleSimulation forwards to SimulationDeviceRepositoryImpl",
+          "SimulationDeviceRepositoryImpl.toggleDevice calls DevicesFirestoreSource.updateDeviceState",
+          "updateDeviceState writes to Firestore device_states/{deviceId}"
+        ],
+        "collection": "device_states",
+        "issue": "CRITICAL - No UI feedback or state refresh after write"
+      },
+      {
+        "name": "Hardware Toggle",
+        "trigger": "DeviceDetailSheet hardware toggle switch",
+        "flow": [
+          "User toggles hardware switch in device_detail_sheet.dart",
+          "onHwToggle calls DevicesCubit.toggleHardware(deviceId, newStatus)",
+          "DevicesCubit.toggleHardware forwards to HardwareDeviceRepositoryImpl",
+          "HardwareDeviceRepositoryImpl.toggleDevice writes to Firestore Control/Real_Device_01"
+        ],
+        "collection": "Control",
+        "issue": "Writes to Control collection instead of device_states"
+      }
+    ]
+  },
+  "simulationToggleFunctionality": {
+    "currentImplementation": {
+      "uiComponent": "device_detail_sheet.dart - _SourceControlRow widget",
+      "toggleButton": "Switch widget with onSimToggle callback",
+      "cubitMethod": "DevicesCubit.toggleSimulation(deviceId, newStatus)"
+    },
+    "dataFlow": {
+      "step1": {
+        "location": "device_detail_sheet.dart",
+        "code": "onSimToggle: (val) { context.read<DevicesCubit>().toggleSimulation(device.id, val); }",
+        "action": "User toggles switch, calls cubit method"
+      },
+      "step2": {
+        "location": "devices_cubit.dart - toggleSimulation method",
+        "code": "Future<void> toggleSimulation(String deviceId, bool newStatus) async { ... await _repository.toggleDevice(..., newStatus); }",
+        "action": "Cubit retrieves device model and calls repository"
+      },
+      "step3": {
+        "location": "combined_device_repository.dart - toggleDevice method",
+        "logic": "Checks if device.source == simulation, then calls simulationRepository.toggleDevice",
+        "action": "Router determines simulation vs hardware"
+      },
+      "step4": {
+        "location": "simulation_device_repository_impl.dart - toggleDevice method",
+        "code": "await _firestoreSource.updateDeviceState(device.id, newStatus);",
+        "action": "Calls data source to write to Firestore"
+      },
+      "step5": {
+        "location": "devices_firestore_source.dart - updateDeviceState method",
+        "code": "await _firestore.collection('device_states').doc(deviceId).set({ 'status': isOn ? 'ON' : 'OFF', 'last_updated': FieldValue.serverTimestamp() }, SetOptions(merge: true));",
+        "action": "Writes to Firestore device_states collection",
+        "result": "UPDATE SUCCESSFUL - Firestore updated"
+      }
+    },
+    "whyItMightNotBeResponding": [
+      {
+        "issue": "No UI state update after toggle",
+        "reason": "toggleSimulation is async void - no await in UI layer",
+        "evidence": "onSimToggle callback doesn't await the toggle operation",
+        "impact": "Switch returns to previous state immediately, user sees no feedback",
+        "fix": "Add try-catch error handling and emit state change"
+      },
+      {
+        "issue": "No error feedback to user",
+        "reason": "toggleSimulation has try-catch but only debugPrints error",
+        "evidence": "catch (e) { debugPrint('[DevicesCubit] toggleSimulation error: $e'); }",
+        "impact": "Silent failures - network errors don't notify user",
+        "fix": "Emit error state or show snackbar"
+      },
+      {
+        "issue": "Timing mismatch between streams",
+        "reason": "Device stream updates via watchSimDevices, but toggle writes to different collection path",
+        "evidence": "watchSimDevices reads from device_states, updateDeviceState writes with merge: true",
+        "impact": "Stream might not fire if Firestore doesn't recognize the change",
+        "fix": "Ensure field names and paths are consistent"
+      },
+      {
+        "issue": "Device model source field incorrect",
+        "reason": "toggleSimulation forces source=simulation but combined repo might still route to hardware",
+        "evidence": "toggleDevice in combined_device_repository checks 'device.source == DeviceSourceType.hardware OR device.hardwareSensor != null'",
+        "impact": "If device has hardwareSensor, hardware toggle is called instead of simulation",
+        "fix": "Fix the logic in toggleSimulation - ensure device copy has correct source"
+      },
+      {
+        "issue": "No confirmation state emission",
+        "reason": "DevicesCubit._emitLoaded only emits from stream subscription, not from toggle action",
+        "evidence": "No emit after toggleDevice completes successfully",
+        "impact": "UI shows old state while Firestore is updating in background",
+        "fix": "Emit optimistic update state immediately, revert on error"
+      },
+      {
+        "issue": "Firestore permissions or security rules",
+        "reason": "device_states collection might have restrictive read/write rules",
+        "evidence": "No error handling shows what permission errors look like",
+        "impact": "Silent write failures if user doesn't have permission",
+        "fix": "Add explicit error state emission, check Firestore security rules"
+      }
+    ],
+    "rootCauses": {
+      "primary": "No UI state refresh mechanism after Firestore write completes",
+      "secondary": "Silent error handling - exceptions not propagated to UI layer",
+      "tertiary": "Race condition between stream subscription updates and manual toggle writes",
+      "quaternary": "Logic error in toggleSimulation device model source assignment"
+    },
+    "recommendedFix": {
+      "approach": "Implement optimistic update pattern with rollback",
+      "steps": [
+        "1. Emit optimistic update state immediately when toggle is called",
+        "2. Update local _devices map with new status",
+        "3. Emit updated DevicesLoaded state",
+        "4. Perform async Firestore write in background",
+        "5. On success: state is already correct",
+        "6. On error: revert local map and emit error state with snackbar"
+      ]
+    }
+  },
+  "recommendations": {
+    "architecture": [
+      {
+        "priority": "CRITICAL",
+        "title": "Consolidate AI Models",
+        "description": "Merge AiResult and AIResultModel into single model class",
+        "effort": "Medium (2-3 hours)",
+        "impact": "Eliminates model confusion, reduces mapping overhead"
+      },
+      {
+        "priority": "HIGH",
+        "title": "Unify AI Sanitization Logic",
+        "description": "Extract _sanitise and _recomputeSeverity to shared utility class",
+        "effort": "Low (30 mins)",
+        "impact": "Reduces duplicate code, single source of truth"
+      },
+      {
+        "priority": "HIGH",
+        "title": "Extract Common Data Sources",
+        "description": "Merge AiResultsRepository and FirestoreEnergyDataSource into single source",
+        "effort": "Medium (2 hours)",
+        "impact": "Single Firestore gateway, easier to test and maintain"
+      },
+      {
+        "priority": "MEDIUM",
+        "title": "Consolidate Energy Widget Duplicates",
+        "description": "Extract shared widget base classes for cards, charts, panels",
+        "effort": "Medium (3-4 hours)",
+        "impact": "Code reuse, consistent UI patterns"
+      },
+      {
+        "priority": "MEDIUM",
+        "title": "Merge Firestore Collection References",
+        "description": "Consolidate Control and Devices collections into one",
+        "effort": "Low (1 hour) + migration",
+        "impact": "Simpler data model, fewer write conflicts"
+      }
+    ],
+    "simulationToggleFix": [
+      {
+        "priority": "CRITICAL",
+        "issue": "Add error state emission in toggleSimulation",
+        "file": "lib/features/devices/cubit/devices_cubit.dart",
+        "change": "Add DevicesError state emission on catch block"
+      },
+      {
+        "priority": "CRITICAL",
+        "issue": "Add optimistic update pattern",
+        "file": "lib/features/devices/cubit/devices_cubit.dart",
+        "change": "Emit updated state immediately, with rollback on error"
+      },
+      {
+        "priority": "HIGH",
+        "issue": "Fix device source assignment in toggleSimulation",
+        "file": "lib/features/devices/cubit/devices_cubit.dart",
+        "change": "Ensure copyWith(source:) correctly sets DeviceSourceType.simulation"
+      },
+      {
+        "priority": "HIGH",
+        "issue": "Add UI feedback for toggle action",
+        "file": "lib/features/devices/widgets/device_detail_sheet.dart",
+        "change": "Show loading spinner during toggle, handle error snackbar"
+      },
+      {
+        "priority": "MEDIUM",
+        "issue": "Verify Firestore security rules",
+        "description": "Ensure device_states collection allows authenticated writes"
+      }
+    ]
+  },
+  "statistics": {
+    "codeMetrics": {
+      "totalFeaturesAnalyzed": 3,
+      "totalFilesAnalyzed": 40,
+      "duplicatedWidgets": 12,
+      "duplicatedCubitMethods": 3,
+      "duplicatedDataSources": 2,
+      "duplicatedModels": 2
+    },
+    "duplicationRatio": {
+      "estimate": "~35% of widget code is duplicated",
+      "estimatedLines": "~2100 duplicate lines across three modules"
+    }
+  }
+}
