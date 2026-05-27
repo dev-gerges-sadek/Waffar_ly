@@ -4,8 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/theme/sh_colors.dart';
 import '../../../alert/screens/alerts_screen.dart';
+import '../../../ai_dashboard/screens/ai_energy_dashboard_screen.dart';
 import '../../../chatbot/screens/chatbot_screen.dart';
-import '../../../energy/screens/energy_dashboard_screen.dart';
+import '../../../hardware/screens/hardware_screen.dart';
 import '../../../weather/screens/weather_screen.dart';
 
 class HomeDrawer extends StatelessWidget {
@@ -14,31 +15,37 @@ class HomeDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n      = AppLocalizations.of(context);
-    final isDark    = Theme.of(context).brightness == Brightness.dark;
-    final bgColor   = isDark
+    final l10n = AppLocalizations.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    final bgColor = isDark
         ? SHColors.darkBackgroundColor
         : SHColors.lightBackgroundColor;
     final cardColor = SHColors.card(context);
-    final primary   = SHColors.primary(context);
+    final primary = SHColors.primary(context);
     final textColor = SHColors.text(context);
     final hintColor = SHColors.hint(context);
 
     return Drawer(
       backgroundColor: bgColor,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topRight:    Radius.circular(28.r),
-          bottomRight: Radius.circular(28.r),
-        ),
+        borderRadius: isRtl
+            ? const BorderRadius.only(
+                topLeft: Radius.circular(28),
+                bottomLeft: Radius.circular(28),
+              )
+            : const BorderRadius.only(
+                topRight: Radius.circular(28),
+                bottomRight: Radius.circular(28),
+              ),
       ),
       child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Header ──────────────────────────────────────────────────
+            // ── Header ───────────────────────────────────────────────────
             Padding(
-              padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 0),
+              padding: EdgeInsetsDirectional.fromSTEB(20.w, 20.h, 20.w, 0),
               child: Row(
                 children: [
                   Container(
@@ -52,8 +59,11 @@ class HomeDrawer extends StatelessWidget {
                             : SHColors.lightPrimaryGradient,
                       ),
                     ),
-                    child: Icon(Icons.home_rounded,
-                        color: Colors.white, size: 24.sp),
+                    child: Icon(
+                      Icons.home_rounded,
+                      color: SHColors.card(context),
+                      size: 24.sp,
+                    ),
                   ),
                   SizedBox(width: 12.w),
                   Column(
@@ -68,9 +78,8 @@ class HomeDrawer extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'Smart Home',
-                        style: TextStyle(
-                            fontSize: 11.sp, color: hintColor),
+                        l10n.smartAssist,
+                        style: TextStyle(fontSize: 11.sp, color: hintColor),
                       ),
                     ],
                   ),
@@ -80,15 +89,16 @@ class HomeDrawer extends StatelessWidget {
 
             SizedBox(height: 24.h),
             Divider(
-                color: hintColor.withOpacity(0.15),
-                indent: 20.w,
-                endIndent: 20.w),
+              color: hintColor.withOpacity(0.15),
+              indent: 20.w,
+              endIndent: 20.w,
+            ),
             SizedBox(height: 16.h),
 
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              padding: EdgeInsetsDirectional.symmetric(horizontal: 20.w),
               child: Text(
-                'FEATURES',
+                l10n.devices.toUpperCase(),
                 style: TextStyle(
                   fontSize: 10.sp,
                   fontWeight: FontWeight.w700,
@@ -103,7 +113,7 @@ class HomeDrawer extends StatelessWidget {
             _DrawerTile(
               icon: Icons.wb_sunny_outlined,
               label: l10n.weather,
-              color: Colors.orange,
+              color: SHColors.warning(context),
               cardColor: cardColor,
               textColor: textColor,
               onTap: () {
@@ -119,7 +129,7 @@ class HomeDrawer extends StatelessWidget {
               textColor: textColor,
               onTap: () {
                 Navigator.pop(context);
-                onNavigate(const EnergyDashboardScreen());
+                onNavigate(const AiEnergyDashboardScreen());
               },
             ),
             _DrawerTile(
@@ -146,20 +156,29 @@ class HomeDrawer extends StatelessWidget {
                 onNavigate(const ChatbotScreen());
               },
             ),
-
+            _DrawerTile(
+              icon: Icons.devices_rounded,
+              label: l10n.hardware,
+              color: primary,
+              cardColor: cardColor,
+              textColor: textColor,
+              onTap: () {
+                Navigator.pop(context);
+                onNavigate(const HardwareScreen());
+              },
+            ),
             const Spacer(),
 
             Divider(
-                color: hintColor.withOpacity(0.15),
-                indent: 20.w,
-                endIndent: 20.w),
+              color: hintColor.withOpacity(0.15),
+              indent: 20.w,
+              endIndent: 20.w,
+            ),
             Padding(
-              padding:
-                  EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+              padding: EdgeInsetsDirectional.symmetric(horizontal: 20.w, vertical: 12.h),
               child: Text(
-                'v1.0.0  ·  Waffar',
-                style:
-                    TextStyle(fontSize: 10.sp, color: hintColor),
+                'v1.0.0  ·  ${l10n.appName}',
+                style: TextStyle(fontSize: 10.sp, color: hintColor),
               ),
             ),
           ],
@@ -169,7 +188,8 @@ class HomeDrawer extends StatelessWidget {
   }
 }
 
-// ── Single drawer tile ─────────────────────────────────────────────────────────
+// ── Single drawer tile ────────────────────────────────────────────────────────
+
 class _DrawerTile extends StatelessWidget {
   const _DrawerTile({
     required this.icon,
@@ -189,12 +209,14 @@ class _DrawerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 3.h),
+      padding: EdgeInsetsDirectional.symmetric(horizontal: 12.w, vertical: 3.h),
       child: ListTile(
         onTap: onTap,
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14.r)),
+          borderRadius: BorderRadius.circular(14.r),
+        ),
         tileColor: cardColor,
         leading: Container(
           width: 38.w,
@@ -213,8 +235,13 @@ class _DrawerTile extends StatelessWidget {
             color: textColor,
           ),
         ),
-        trailing: Icon(Icons.arrow_forward_ios_rounded,
-            size: 13, color: color.withOpacity(0.6)),
+        trailing: Icon(
+          isRtl
+              ? Icons.arrow_back_ios_rounded
+              : Icons.arrow_forward_ios_rounded,
+          size: 13,
+          color: color.withOpacity(0.6),
+        ),
       ),
     );
   }

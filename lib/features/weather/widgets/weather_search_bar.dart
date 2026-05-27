@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
+import '../../../core/l10n/app_localizations.dart';
 import '../../../core/theme/sh_colors.dart';
 import '../cubit/weather_cubit.dart';
 
@@ -30,14 +30,16 @@ class _WeatherSearchBarState extends State<WeatherSearchBar> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n      = AppLocalizations.of(context);
     final isDark    = Theme.of(context).brightness == Brightness.dark;
     final surface   = isDark ? SHColors.darkSurfaceColor : SHColors.lightSurfaceColor;
     final textColor = SHColors.text(context);
     final hintColor = SHColors.hint(context);
     final primary   = SHColors.primary(context);
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 10.h),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 0, 16.w, 10.h),
       child: Row(
         children: [
           Expanded(
@@ -46,13 +48,13 @@ class _WeatherSearchBarState extends State<WeatherSearchBar> {
               onSubmitted: (_) => _search(),
               style: TextStyle(fontSize: 13.sp, color: textColor),
               decoration: InputDecoration(
-                hintText: 'Search city, e.g. Cairo, London…',
+                hintText: l10n.searchCity,
                 hintStyle: TextStyle(fontSize: 12.sp, color: hintColor),
                 prefixIcon: Icon(Icons.search, color: hintColor, size: 18),
                 filled: true,
                 fillColor: surface,
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                contentPadding: EdgeInsetsDirectional.symmetric(
+                    horizontal: 12.w, vertical: 10.h),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
                   borderSide: BorderSide.none,
@@ -73,7 +75,7 @@ class _WeatherSearchBarState extends State<WeatherSearchBar> {
                 color: primary,
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              child: const Icon(Icons.search, color: Colors.white, size: 20),
+              child: Icon(Icons.search, color: onPrimary, size: 20),
             ),
           ),
         ],

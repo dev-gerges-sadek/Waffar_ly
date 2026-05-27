@@ -15,7 +15,7 @@ class CustomCategoryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(
+      padding: EdgeInsetsDirectional.symmetric(
         horizontal: context.w(4),
         vertical: context.h(8),
       ),
@@ -28,7 +28,7 @@ class CustomCategoryButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(context.w(12)),
           ),
-          padding: EdgeInsets.symmetric(vertical: context.h(14)),
+          padding: EdgeInsetsDirectional.symmetric(vertical: context.h(14)),
         ),
         child: Text(
           text,

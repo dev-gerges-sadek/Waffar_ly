@@ -6,9 +6,8 @@
 // These are extracted from AiEnergyCubit to enable reuse and testing.
 // ============================================================================
 
-import 'package:flutter/foundation.dart';
-
 import '../../../core/constants/app_constants.dart';
+import '../cubit/ai_energy_state.dart';
 import '../models/ai_result.dart';
 
 /// Shared AI utility functions for data processing and analysis.
@@ -18,7 +17,7 @@ class AiUtilities {
   // ── Sanitization ──────────────────────────────────────────────────────────
 
   /// Cleans raw Firestore data: handles idle states and corrects false anomalies.
-  /// 
+  ///
   /// - Returns idle state when all readings are zero
   /// - Detects standby mode (voltage present but no power)
   /// - Corrects false anomaly classifications when probability is low
@@ -54,7 +53,7 @@ class AiUtilities {
   // ── Severity Computation ──────────────────────────────────────────────────
 
   /// Computes severity level based on current power and amperage readings.
-  /// 
+  ///
   /// Thresholds are defined in [AppConstants]:
   /// - Critical: watts > aiWattsCritical OR amps > aiAmpsCritical
   /// - Danger: watts > aiWattsDanger OR amps > aiAmpsDanger
@@ -80,7 +79,7 @@ class AiUtilities {
   // ── Room Mapping ──────────────────────────────────────────────────────────
 
   /// Maps device ID suffixes to room names using [AppConstants.roomSuffixMap].
-  /// 
+  ///
   /// Returns 'Other' if no matching suffix is found in the device ID.
   static String roomFromDeviceId(String id) {
     for (final entry in AppConstants.roomSuffixMap.entries) {
@@ -92,7 +91,7 @@ class AiUtilities {
   // ── Health Derivation ─────────────────────────────────────────────────────
 
   /// Derives overall system health status from AI results and energy consumption.
-  /// 
+  ///
   /// - Critical: any source at critical severity OR totalKwh > 50
   /// - Caution: any source at danger/warning severity OR totalKwh > 20
   /// - Healthy: all other states

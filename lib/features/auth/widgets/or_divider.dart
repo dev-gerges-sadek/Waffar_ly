@@ -1,69 +1,63 @@
-// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waffar_ly_app/core/helper/extensions/media_query.dart';
+import '../../../../core/helper/extensions/media_query.dart';
+import '../../../../core/l10n/app_localizations.dart';
 import '../cubit/cubit.dart';
 
 class OrDivider extends StatelessWidget {
-  const OrDivider({super.key, required this.text});
-  final String text;
+  /// [mode] is 'in' (sign-in) or 'up' (sign-up) — drives l10n label.
+  const OrDivider({super.key, required this.mode});
+  final String mode; // 'in' | 'up'
 
   @override
   Widget build(BuildContext context) {
-    final onSurface = Theme.of(context).colorScheme.onSurface;
-    final surface   = Theme.of(context).colorScheme.surface;
+    final l10n     = AppLocalizations.of(context);
+    final onSurf   = Theme.of(context).colorScheme.onSurface;
+    final surface  = Theme.of(context).colorScheme.surface;
+    final divLabel = mode == 'in' ? l10n.signIn : l10n.signUp;
 
     return Column(
       children: [
         SizedBox(height: context.h(16)),
         Row(
           children: [
-            // Divider line
-            Expanded(
-              child: Divider(color: onSurface.withOpacity(0.2), thickness: 1),
-            ),
+            Expanded(child: Divider(color: onSurf.withOpacity(0.2), thickness: 1)),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: context.w(12)),
+              padding: EdgeInsetsDirectional.symmetric(horizontal: context.w(12)),
               child: Text(
-                'Or sign $text with',
+                '${l10n.language == 'العربية' ? 'أو تسجيل' : 'Or'} $divLabel ${l10n.language == 'العربية' ? 'بواسطة' : 'with'}',
                 style: TextStyle(
-                  fontSize: context.sp(14),
-                  color: onSurface.withOpacity(0.6), // ✅ theme-aware
+                  fontSize: context.sp(13),
+                  color: onSurf.withOpacity(0.6),
                 ),
               ),
             ),
-            Expanded(
-              child: Divider(color: onSurface.withOpacity(0.2), thickness: 1),
-            ),
+            Expanded(child: Divider(color: onSurf.withOpacity(0.2), thickness: 1)),
           ],
         ),
         SizedBox(height: context.h(16)),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Apple button
-            _SocialButton(
+            _SocialBtn(
               bgColor: surface,
-              borderColor: onSurface.withOpacity(0.2),
-              child: Icon(Icons.apple, color: onSurface, size: 24),
+              borderColor: onSurf.withOpacity(0.2),
               onTap: () {},
+              child: Icon(Icons.apple, color: onSurf, size: 24),
             ),
             SizedBox(width: context.w(16)),
-            // Google button
-            _SocialButton(
+            _SocialBtn(
               bgColor: surface,
-              borderColor: onSurface.withOpacity(0.2),
-              child: Container(
+              borderColor: onSurf.withOpacity(0.2),
+              onTap: () => context.read<AuthCubit>().signInWithGoogle(),
+              child: SizedBox(
                 width: context.w(24),
                 height: context.w(24),
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/images/google_image.png'),
-                    fit: BoxFit.cover,
-                  ),
+                child: const Image(
+                  image: AssetImage('assets/images/google_image.png'),
+                  fit: BoxFit.cover,
                 ),
               ),
-              onTap: () => context.read<AuthCubit>().signInWithGoogle(),
             ),
           ],
         ),
@@ -72,8 +66,8 @@ class OrDivider extends StatelessWidget {
   }
 }
 
-class _SocialButton extends StatelessWidget {
-  const _SocialButton({
+class _SocialBtn extends StatelessWidget {
+  const _SocialBtn({
     required this.bgColor,
     required this.borderColor,
     required this.child,
@@ -86,20 +80,18 @@ class _SocialButton extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 52,
-        height: 52,
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: borderColor),
+  Widget build(BuildContext context) => GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: borderColor),
+          ),
+          alignment: Alignment.center,
+          child: child,
         ),
-        alignment: Alignment.center,
-        child: child,
-      ),
-    );
-  }
+      );
 }

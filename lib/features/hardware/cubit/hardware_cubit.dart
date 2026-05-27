@@ -1,61 +1,81 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../core/constants/app_constants.dart';
 import '../models/hardware_device.dart';
 import 'hardware_states.dart';
 
 class HardwareCubit extends Cubit<HardwareState> {
   HardwareCubit() : super(HardwareInitial());
 
-  final _firestore = FirebaseFirestore.instance;
+  final _db = FirebaseFirestore.instance;
   StreamSubscription? _sub;
+  Timer? _reconnectTimer;
+  HwConnectionStatus _connStatus = HwConnectionStatus.disconnected;
 
-  void startMonitoring() {
+  void startListening() {
     emit(HardwareLoading());
+    _connStatus = HwConnectionStatus.reconnecting;
 
     _sub?.cancel();
-    _sub = _firestore
+    // Listen to Real_Device_01 from Devices collection
+    _sub = _db
         .collection('Devices')
+        .doc(AppConstants.docRealDevice)
         .snapshots()
         .listen(
-      (snapshot) {
-        final devices = <HardwareDevice>[];
+          (snap) {
+            _reconnectTimer?.cancel();
+            _connStatus = HwConnectionStatus.connected;
 
-        for (final doc in snapshot.docs) {
-          try {
-            final device =
-                HardwareDevice.fromFirestore(doc.id, doc.data());
-            // Only include if it looks like real hardware (has source field)
-            if (doc.data().containsKey('source')) {
-              devices.add(device);
+            if (snap.exists && snap.data() != null) {
+              final device = HardwareDevice.fromFirestore(
+                snap.id,
+                snap.data() as Map<String, dynamic>,
+              );
+
+              if (!isClosed) {
+                emit(
+                  HardwareLoaded(
+                    devices: [device],
+                    connectionStatus: _connStatus,
+                  ),
+                );
+              }
+            } else {
+              if (!isClosed) {
+                emit(
+                  HardwareLoaded(devices: [], connectionStatus: _connStatus),
+                );
+              }
             }
-          } catch (_) {
-            // Skip malformed documents
-          }
-        }
 
-        if (!isClosed) {
-          final isConnected = devices.isNotEmpty &&
-              devices.any((d) => d.connectionStatus == 'Connected');
-          emit(HardwareLoaded(
-            devices: devices,
-            isConnected: isConnected,
-          ));
-        }
-      },
-      onError: (e) {
-        if (!isClosed) {
-          emit(HardwareError(e.toString()));
-        }
-      },
-    );
+            // Set reconnect watchdog: if no update in 30s → show reconnecting
+            _reconnectTimer = Timer(const Duration(seconds: 30), () {
+              _connStatus = HwConnectionStatus.reconnecting;
+              if (!isClosed && state is HardwareLoaded) {
+                final s = state as HardwareLoaded;
+                emit(
+                  HardwareLoaded(
+                    devices: s.devices,
+                    connectionStatus: _connStatus,
+                  ),
+                );
+              }
+            });
+          },
+          onError: (e) {
+            _connStatus = HwConnectionStatus.disconnected;
+            if (!isClosed) emit(HardwareError(e.toString()));
+          },
+        );
   }
 
   @override
   Future<void> close() {
     _sub?.cancel();
+    _reconnectTimer?.cancel();
     return super.close();
   }
 }

@@ -1,21 +1,6 @@
-import 'package:flutter/material.dart';
-import '../theme/sh_colors.dart';
+/// Thin semantic aliases over [SHColors].
+/// DO NOT define any raw Color() / hex values here.
+/// All colours live exclusively in core/theme/sh_colors.dart.
+library;
 
-/// Helpers للكود اللي بيستخدم AppColors — كلها بتاخد context عشان تدعم Dark Mode.
-class AppColors {
-  static Color primaryBlue(BuildContext context) => SHColors.primary(context);
-  static Color secondaryBlue(BuildContext context) =>
-      Theme.of(context).brightness == Brightness.dark
-          ? SHColors.darkSecondaryColor
-          : SHColors.lightSecondaryColor;
-  static Color greyText(BuildContext context) => SHColors.hint(context);
-  static Color redColor(BuildContext context) =>
-      Theme.of(context).brightness == Brightness.dark
-          ? SHColors.darkErrorColor
-          : SHColors.lightErrorColor;
-  static Color backgroundColor(BuildContext context) => SHColors.background(context);
-
-  // ✅ بدل ما يكونوا hardcoded، بيتبعوا الـ theme
-  static Color get whiteColor => Colors.white;
-  static Color get blackColor => Colors.black;
-}
+export '../theme/sh_colors.dart';

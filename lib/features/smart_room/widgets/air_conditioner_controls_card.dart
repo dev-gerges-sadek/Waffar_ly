@@ -1,11 +1,10 @@
 // ignore_for_file: deprecated_member_use
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import '../../../core/core.dart';
-import '../../../core/l10n/app_localizations.dart';
+import '../data/smart_room_repository.dart';
 
 class AirConditionerControlsCard extends StatefulWidget {
   const AirConditionerControlsCard({required this.room, super.key});
@@ -18,19 +17,19 @@ class AirConditionerControlsCard extends StatefulWidget {
 
 class _AirConditionerControlsCardState
     extends State<AirConditionerControlsCard> {
-  late bool   _isOn;
-  late int    _temp;
-  int         _fanSpeed = 2; // 1=Low 2=Mid 3=High
-  String      _mode     = 'Cool';
+  late bool _isOn;
+  late int _temp;
+  int _fanSpeed = 2;
+  String _mode = 'Cool';
 
-  final _firestore = FirebaseFirestore.instance;
+  // Injected — no direct FirebaseFirestore
+  final _repo = GetIt.I<SmartRoomRepository>();
 
-  // Default temperatures per mode
   static const Map<String, int> _modeDefaultTemp = {
     'Cool': 20,
     'Heat': 24,
-    'Fan':  22,
-    'Dry':  22,
+    'Fan': 22,
+    'Dry': 22,
   };
 
   @override
@@ -47,7 +46,7 @@ class _AirConditionerControlsCardState
       _mode = mode;
       _temp = _modeDefaultTemp[mode] ?? 20;
     });
-    await _pushToFirebase();
+    await _push();
   }
 
   Future<void> _changeTemp(int delta) async {
@@ -55,57 +54,58 @@ class _AirConditionerControlsCardState
     final next = _temp + delta;
     if (next < 16 || next > 30) return;
     setState(() => _temp = next);
-    await _pushToFirebase();
+    await _push();
   }
 
   Future<void> _togglePower(bool val) async {
     setState(() => _isOn = val);
-    await _pushToFirebase();
+    await _push();
   }
 
-  Future<void> _pushToFirebase() async {
+  Future<void> _push() async {
     try {
-      final docId = 'AC_BR_0${widget.room.id}';
-      await _firestore.collection('device_states').doc(docId).set({
-        'status':       _isOn ? 'ON' : 'OFF',
-        'temperature':  _temp,
-        'mode':         _mode,
-        'fan_speed':    _fanSpeed,
-        'last_updated': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
-    } catch (_) {}
+      await _repo.updateAc(
+        roomId: int.parse(widget.room.id),
+        isOn: _isOn,
+        temperature: _temp.toInt(),
+        mode: _mode,
+        fanSpeed: _fanSpeed,
+      );
+    } catch (e) {
+      debugPrint('[AirconditionerControls] Failed to update AC: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final l10n      = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
     final textColor = SHColors.text(context);
     final hintColor = SHColors.hint(context);
-    final primary   = SHColors.primary(context);
-    final track     = SHColors.track(context);
+    final primary = SHColors.primary(context);
+    final track = SHColors.track(context);
 
     final modes = [
-      _ModeData(SHIcons.snowFlake,      l10n.cool, 'Cool'),
+      _ModeData(SHIcons.snowFlake, l10n.cool, 'Cool'),
       _ModeData(Icons.whatshot_outlined, l10n.heat, 'Heat'),
-      _ModeData(SHIcons.wind,           l10n.fan,  'Fan'),
-      _ModeData(SHIcons.waterDrop,      l10n.dry,  'Dry'),
+      _ModeData(SHIcons.wind, l10n.fan, 'Fan'),
+      _ModeData(SHIcons.waterDrop, l10n.dry, 'Dry'),
     ];
-
     final speedLabels = ['', l10n.low, l10n.mid, l10n.high];
 
     return SHCard(
       childrenPadding: EdgeInsets.all(12.w),
       children: [
-        // ── Header: title + power toggle + temp ──────────────────────
+        // ── Header: title + power + temp ─────────────────────────────
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               l10n.airConditioning,
               style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w700,
-                  color: textColor),
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w700,
+                color: textColor,
+              ),
             ),
             SizedBox(height: 12.h),
             Row(
@@ -118,7 +118,6 @@ class _AirConditionerControlsCardState
                   ),
                 ),
                 const Spacer(),
-                // Temperature control
                 _TempBtn(
                   icon: Icons.remove,
                   enabled: _isOn,
@@ -127,7 +126,7 @@ class _AirConditionerControlsCardState
                   onTap: () => _changeTemp(-1),
                 ),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w),
+                  padding: EdgeInsetsDirectional.symmetric(horizontal: 8.w),
                   child: Text(
                     '$_temp°',
                     style: TextStyle(
@@ -154,23 +153,22 @@ class _AirConditionerControlsCardState
           children: [
             ...modes.map(
               (m) => Padding(
-                padding: EdgeInsets.only(right: 8.w),
+                padding: EdgeInsetsDirectional.only(end: 8.w),
                 child: _ModeBtn(
-                  icon:      m.icon,
-                  label:     m.label,
-                  selected:  _mode == m.key,
-                  enabled:   _isOn,
-                  primary:   primary,
+                  icon: m.icon,
+                  label: m.label,
+                  selected: _mode == m.key,
+                  enabled: _isOn,
+                  primary: primary,
                   hintColor: hintColor,
-                  onTap:     () => _setMode(m.key),
+                  onTap: () => _setMode(m.key),
                 ),
               ),
             ),
             const Spacer(),
             Column(
               children: [
-                Icon(SHIcons.fan,
-                    size: 14, color: _isOn ? primary : hintColor),
+                Icon(SHIcons.fan, size: 14, color: _isOn ? primary : hintColor),
                 Text(
                   speedLabels[_fanSpeed],
                   style: TextStyle(
@@ -198,23 +196,24 @@ class _AirConditionerControlsCardState
                 inactiveColor: track,
                 onChanged: _isOn
                     ? (v) => setState(() {
-                          _fanSpeed = v.round();
-                          _pushToFirebase();
-                        })
+                        _fanSpeed = v.round();
+                        _push();
+                      })
                     : null,
               ),
             ),
             Text(
               speedLabels[_fanSpeed],
               style: TextStyle(
-                  fontSize: 10.sp,
-                  color: hintColor,
-                  fontWeight: FontWeight.w500),
+                fontSize: 10.sp,
+                color: hintColor,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),
 
-        // ── Humidity display ──────────────────────────────────────────
+        // ── Humidity ──────────────────────────────────────────────────
         Row(
           children: [
             Container(
@@ -236,9 +235,10 @@ class _AirConditionerControlsCardState
                     Text(
                       l10n.airHumidity,
                       style: GoogleFonts.montserrat(
-                          fontSize: 10.sp,
-                          color: hintColor,
-                          fontWeight: FontWeight.w500),
+                        fontSize: 10.sp,
+                        color: hintColor,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                     SizedBox(width: 8.w),
                     Text(
@@ -256,15 +256,17 @@ class _AirConditionerControlsCardState
   }
 }
 
-// ── Data class for mode buttons ───────────────────────────────────────────────
+// ── Mode data ─────────────────────────────────────────────────────────────────
+
 class _ModeData {
   const _ModeData(this.icon, this.label, this.key);
   final IconData icon;
-  final String   label;
-  final String   key;
+  final String label;
+  final String key;
 }
 
-// ── Temperature +/- button ────────────────────────────────────────────────────
+// ── Temperature button ────────────────────────────────────────────────────────
+
 class _TempBtn extends StatelessWidget {
   const _TempBtn({
     required this.icon,
@@ -273,36 +275,33 @@ class _TempBtn extends StatelessWidget {
     required this.hintColor,
     required this.onTap,
   });
+
   final IconData icon;
-  final bool     enabled;
-  final Color    primary;
-  final Color    hintColor;
+  final bool enabled;
+  final Color primary;
+  final Color hintColor;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: enabled ? onTap : null,
       child: Container(
-        width: 28.w,
-        height: 28.w,
+        padding: EdgeInsets.all(8.w),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: enabled ? primary.withOpacity(0.15) : Colors.transparent,
-          border: Border.all(
-            color: enabled
-                ? primary.withOpacity(0.4)
-                : hintColor.withOpacity(0.2),
-          ),
+          color: enabled
+              ? primary.withOpacity(0.1)
+              : hintColor.withOpacity(0.08),
         ),
-        child:
-            Icon(icon, size: 16.sp, color: enabled ? primary : hintColor),
+        child: Icon(icon, size: 18.sp, color: enabled ? primary : hintColor),
       ),
     );
   }
 }
 
-// ── Mode icon button ──────────────────────────────────────────────────────────
+// ── Mode button ───────────────────────────────────────────────────────────────
+
 class _ModeBtn extends StatelessWidget {
   const _ModeBtn({
     required this.icon,
@@ -313,43 +312,42 @@ class _ModeBtn extends StatelessWidget {
     required this.hintColor,
     required this.onTap,
   });
+
   final IconData icon;
-  final String   label;
-  final bool     selected;
-  final bool     enabled;
-  final Color    primary;
-  final Color    hintColor;
+  final String label;
+  final bool selected;
+  final bool enabled;
+  final Color primary;
+  final Color hintColor;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final color = (enabled && selected) ? primary : hintColor;
+    final active = selected && enabled;
     return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
+      onTap: enabled ? onTap : null,
+      child: Container(
+        padding: EdgeInsetsDirectional.symmetric(
+          horizontal: 10.w,
+          vertical: 6.h,
+        ),
         decoration: BoxDecoration(
-          color: (enabled && selected)
-              ? primary.withOpacity(0.12)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(8.r),
+          color: active ? primary.withOpacity(0.15) : Colors.transparent,
+          borderRadius: BorderRadius.circular(10.r),
           border: Border.all(
-            color: (enabled && selected)
-                ? primary.withOpacity(0.35)
-                : Colors.transparent,
+            color: active ? primary : hintColor.withOpacity(0.3),
           ),
         ),
         child: Column(
           children: [
-            Icon(icon, color: color, size: 18.sp),
+            Icon(icon, size: 16.sp, color: active ? primary : hintColor),
+            SizedBox(height: 2.h),
             Text(
               label,
               style: TextStyle(
                 fontSize: 8.sp,
-                color: color,
-                fontWeight:
-                    selected ? FontWeight.w700 : FontWeight.w400,
+                color: active ? primary : hintColor,
+                fontWeight: active ? FontWeight.w700 : FontWeight.w400,
               ),
             ),
           ],

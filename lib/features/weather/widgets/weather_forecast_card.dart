@@ -11,7 +11,6 @@ class WeatherForecastCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark    = Theme.of(context).brightness == Brightness.dark;
     final cardColor = SHColors.card(context);
     final textColor = SHColors.text(context);
     final hintColor = SHColors.hint(context);
@@ -19,9 +18,9 @@ class WeatherForecastCard extends StatelessWidget {
 
     // Color based on temperature
     final tempColor = weather.isHot
-        ? Colors.orange
+        ? SHColors.severity(context, 'danger')
         : weather.isCold
-            ? Colors.blue.shade300
+            ? SHColors.chartBlue(context)
             : primary;
 
     return Container(
@@ -31,7 +30,7 @@ class WeatherForecastCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.2 : 0.06),
+            color: SHColors.shadow(context),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -81,7 +80,7 @@ class WeatherForecastCard extends StatelessWidget {
                     _StatChip(
                       icon: Icons.water_drop_outlined,
                       label: '${weather.humidity.toInt()}%',
-                      color: Colors.blue.shade300,
+                      color: SHColors.chartBlue(context),
                     ),
                     SizedBox(width: 8.w),
                     _StatChip(

@@ -8,21 +8,32 @@ class DevicesFirestoreSource {
   final FirebaseFirestore _firestore;
 
   Stream<Map<String, DeviceData>> watchSimDevices(List<String> deviceIds) {
-    return _firestore.collection(AppConstants.colDeviceStates).snapshots().map(
-          (snapshot) => Map.fromEntries(snapshot.docs
-              .where((doc) => deviceIds.contains(doc.id))
-              .map((doc) => MapEntry(
-                    doc.id,
-                    DeviceData.fromFirestore(doc.data()),
-                  ))),
+    return _firestore
+        .collection(AppConstants.colDeviceStates)
+        .snapshots()
+        .map(
+          (snapshot) => Map.fromEntries(
+            snapshot.docs
+                .where((doc) => deviceIds.contains(doc.id))
+                .map(
+                  (doc) =>
+                      MapEntry(doc.id, DeviceData.fromFirestore(doc.data())),
+                ),
+          ),
         );
   }
 
-  Future<Map<String, DeviceData>> readSimDevicesOnce(List<String> deviceIds) async {
-    final snapshot = await _firestore.collection(AppConstants.colDeviceStates).get();
-    return Map.fromEntries(snapshot.docs
-        .where((doc) => deviceIds.contains(doc.id))
-        .map((doc) => MapEntry(doc.id, DeviceData.fromFirestore(doc.data()))));
+  Future<Map<String, DeviceData>> readSimDevicesOnce(
+    List<String> deviceIds,
+  ) async {
+    final snapshot = await _firestore
+        .collection(AppConstants.colDeviceStates)
+        .get();
+    return Map.fromEntries(
+      snapshot.docs
+          .where((doc) => deviceIds.contains(doc.id))
+          .map((doc) => MapEntry(doc.id, DeviceData.fromFirestore(doc.data()))),
+    );
   }
 
   Future<void> updateDeviceState(String deviceId, bool isOn) async {

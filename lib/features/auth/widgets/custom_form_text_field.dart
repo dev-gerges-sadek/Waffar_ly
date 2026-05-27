@@ -42,7 +42,7 @@ class CustomFormTextField extends StatelessWidget {
         hintText: hintText,
         hintStyle: TextStyle(color: colorScheme.onSurface.withOpacity(0.4)),
         prefixIcon: Icon(icon, color: colorScheme.primary),
-        contentPadding: EdgeInsets.symmetric(
+        contentPadding: EdgeInsetsDirectional.symmetric(
           horizontal: context.w(16),
           vertical: context.h(14),
         ),

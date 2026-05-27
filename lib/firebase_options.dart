@@ -55,7 +55,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1064395812800',
     projectId: 'smart-home-b6da7',
     authDomain: 'smart-home-b6da7.firebaseapp.com',
-    databaseURL: 'https://smart-home-b6da7-default-rtdb.firebaseio.com',
     storageBucket: 'smart-home-b6da7.firebasestorage.app',
     measurementId: 'G-JG1W910Q4K',
   );
@@ -65,7 +64,6 @@ class DefaultFirebaseOptions {
     appId: '1:1064395812800:android:fb6d9555cf11441883a225',
     messagingSenderId: '1064395812800',
     projectId: 'smart-home-b6da7',
-    databaseURL: 'https://smart-home-b6da7-default-rtdb.firebaseio.com',
     storageBucket: 'smart-home-b6da7.firebasestorage.app',
   );
 }

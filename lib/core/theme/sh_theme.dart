@@ -15,8 +15,7 @@ abstract class SHTheme {
       brightness: Brightness.light,
       primary: SHColors.lightPrimaryColor,
       secondary: SHColors.lightSecondaryColor,
-      background: SHColors.lightBackgroundColor,
-      surface: SHColors.lightSurfaceColor,
+      surfaceContainerHighest: SHColors.lightSurfaceColor,
       error: SHColors.lightErrorColor,
     ),
     textTheme: TextTheme(
@@ -78,9 +77,9 @@ abstract class SHTheme {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: SHColors.lightPrimaryColor,
-        foregroundColor: Colors.white,
+        foregroundColor: SHColors.lightBackgroundColor,
         elevation: 0,
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+        padding: const EdgeInsetsDirectional.symmetric(horizontal: 32, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         textStyle: GoogleFonts.poppins(
           fontSize: 14,
@@ -150,8 +149,7 @@ abstract class SHTheme {
       brightness: Brightness.dark,
       primary: SHColors.darkPrimaryColor,
       secondary: SHColors.darkSecondaryColor,
-      background: SHColors.darkBackgroundColor,
-      surface: SHColors.darkSurfaceColor,
+      surfaceContainerHighest: SHColors.darkSurfaceColor,
       error: SHColors.darkErrorColor,
     ),
     textTheme: TextTheme(
@@ -213,9 +211,9 @@ abstract class SHTheme {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: SHColors.darkPrimaryColor,
-        foregroundColor: Colors.white,
+        foregroundColor: SHColors.lightBackgroundColor,
         elevation: 0,
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+        padding: const EdgeInsetsDirectional.symmetric(horizontal: 32, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         textStyle: GoogleFonts.poppins(
           fontSize: 14,

@@ -1,33 +1,36 @@
 class ChatMessage {
-  ChatMessage({
+  const ChatMessage({
     required this.text,
     required this.isUser,
     required this.timestamp,
-    this.isLoading = false,
   });
 
-  final String text;
-  final bool isUser;
+  final String   text;
+  final bool     isUser;
   final DateTime timestamp;
-  final bool isLoading;
 }
 
-sealed class ChatbotState {}
-
-class ChatbotInitial extends ChatbotState {}
-
-class ChatbotReady extends ChatbotState {
-  ChatbotReady(this.messages);
+sealed class ChatbotState {
+  const ChatbotState(this.messages);
   final List<ChatMessage> messages;
 }
 
+class ChatbotInitial extends ChatbotState {
+  const ChatbotInitial() : super(const []);
+}
+
+/// Messages visible + AI is typing.
 class ChatbotTyping extends ChatbotState {
-  ChatbotTyping(this.messages);
-  final List<ChatMessage> messages;
+  const ChatbotTyping(super.messages);
 }
 
+/// Stable state — normal conversation.
+class ChatbotReady extends ChatbotState {
+  const ChatbotReady(super.messages);
+}
+
+/// Last bot reply errored; previous messages still shown.
 class ChatbotError extends ChatbotState {
-  ChatbotError(this.messages, this.error);
-  final List<ChatMessage> messages;
+  const ChatbotError(super.messages, this.error);
   final String error;
 }

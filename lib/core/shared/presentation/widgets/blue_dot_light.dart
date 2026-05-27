@@ -1,24 +1,21 @@
 import 'package:flutter/material.dart';
+import '../../../theme/sh_colors.dart';
 
+/// Small pulsing dot used to indicate a "live" state.
+/// Colour sourced from [SHColors.primary] — no hardcoded hex.
 class BlueLightDot extends StatelessWidget {
-  const BlueLightDot({
-    super.key,
-  });
+  const BlueLightDot({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox.square(
+    final color = SHColors.primary(context);
+    return SizedBox.square(
       dimension: 8,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: Colors.cyan,
+          color: color,
           shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.cyan,
-              blurRadius: 10,
-            )
-          ],
+          boxShadow: [BoxShadow(color: color, blurRadius: 10)],
         ),
       ),
     );

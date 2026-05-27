@@ -19,11 +19,10 @@ class FirestoreDevicesDataSource {
       .map((snap) => _parseData(snap));
 
   /// Stream of all simulation devices matching [deviceIds].
-  Stream<Map<String, DeviceData>> watchSimDevices(List<String> deviceIds) =>
-      _db
-          .collection(AppConstants.colDeviceStates)
-          .snapshots()
-          .map((snap) => _parseDeviceMap(snap, deviceIds));
+  Stream<Map<String, DeviceData>> watchSimDevices(List<String> deviceIds) => _db
+      .collection(AppConstants.colDeviceStates)
+      .snapshots()
+      .map((snap) => _parseDeviceMap(snap, deviceIds));
 
   // ── Hardware devices ──────────────────────────────────────────────────────
 
@@ -55,8 +54,10 @@ class FirestoreDevicesDataSource {
   HardwareSensor? _parseSensor(DocumentSnapshot snap, String id) {
     if (!snap.exists || snap.data() == null) return null;
     try {
-      return HardwareSensor.fromRtdb(
-          id, Map<String, dynamic>.from(snap.data() as Map));
+      return HardwareSensor.fromFirestore(
+        id,
+        Map<String, dynamic>.from(snap.data() as Map),
+      );
     } catch (_) {
       return null;
     }
@@ -70,7 +71,9 @@ class FirestoreDevicesDataSource {
       final result = <String, DeviceData>{};
       for (final doc in snap.docs) {
         if (filter.contains(doc.id)) {
-          final data = DeviceData.fromMap(Map<String, dynamic>.from(doc.data() as Map));
+          final data = DeviceData.fromMap(
+            Map<String, dynamic>.from(doc.data() as Map),
+          );
           result[doc.id] = data;
         }
       }
@@ -88,8 +91,10 @@ class FirestoreDevicesDataSource {
       final result = <String, HardwareSensor>{};
       for (final doc in snap.docs) {
         if (filter.contains(doc.id)) {
-          final sensor = HardwareSensor.fromRtdb(
-              doc.id, Map<String, dynamic>.from(doc.data() as Map));
+          final sensor = HardwareSensor.fromFirestore(
+            doc.id,
+            Map<String, dynamic>.from(doc.data() as Map),
+          );
           result[doc.id] = sensor;
         }
       }

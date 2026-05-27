@@ -1,32 +1,24 @@
 class AnomalyAlert {
+  final String deviceId;
+  final double currentKwh;
+  final double watts;
+  final double probAnomaly;
+  final String aiDecision;
+  final String recommendation;
+  final DateTime detectedAt;
+
   const AnomalyAlert({
     required this.deviceId,
     required this.currentKwh,
-    required this.avgKwh,
-    required this.zScore,
-    required this.severity,
+    required this.watts,
+    required this.probAnomaly,
+    required this.aiDecision,
+    required this.recommendation,
     required this.detectedAt,
   });
 
-  final String deviceId;
-  final double currentKwh;
-  final double avgKwh;
-  final double zScore;
-  final AnomalySeverity severity;
-  final DateTime detectedAt;
-
-  String get deviceName => deviceId.replaceAll('_', ' ');
-
-  String get message {
-    final pct = avgKwh > 0
-        ? ((currentKwh - avgKwh) / avgKwh * 100).toStringAsFixed(0)
-        : '∞';
-    return '$deviceName is consuming $pct% more than usual '
-        '(${currentKwh.toStringAsFixed(2)} vs avg ${avgKwh.toStringAsFixed(2)} kWh)';
-  }
+  String get deviceName => deviceId.toUpperCase().replaceAll('_', ' ');
 }
-
-enum AnomalySeverity { low, medium, high }
 
 sealed class AnomalyState {}
 
@@ -34,12 +26,13 @@ class AnomalyInitial extends AnomalyState {}
 class AnomalyLoading extends AnomalyState {}
 
 class AnomalyLoaded extends AnomalyState {
-  AnomalyLoaded({required this.alerts, required this.allClear});
   final List<AnomalyAlert> alerts;
   final bool allClear;
+
+  AnomalyLoaded({required this.alerts, required this.allClear});
 }
 
 class AnomalyError extends AnomalyState {
-  AnomalyError(this.message);
   final String message;
+  AnomalyError(this.message);
 }

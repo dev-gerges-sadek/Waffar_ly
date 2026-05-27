@@ -1,14 +1,15 @@
-// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart' hide DeviceType;
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
-
+import '../../../core/l10n/app_localizations.dart';
 import '../../../core/theme/sh_colors.dart';
 import '../cubit/devices_cubit.dart';
+import '../cubit/devices_states.dart';
 import '../models/device_model.dart';
+import 'device_data_panel.dart';
+import 'device_icon.dart';
 
-/// Bottom sheet يعرض تفاصيل جهاز واحد مع Simulation و Hardware
 void showDeviceDetailSheet(BuildContext context, DeviceModel device) {
   showModalBottomSheet(
     context: context,
@@ -32,301 +33,353 @@ class _DeviceDetailSheet extends StatelessWidget {
     final textColor = SHColors.text(context);
     final hintColor = SHColors.hint(context);
     final primary = SHColors.primary(context);
-    final amber =
-        isDark ? SHColors.darkWarningColor : SHColors.lightWarningColor;
-    final isOn = device.simulationData?.isOn ?? false;
+    final amber = isDark
+        ? SHColors.darkWarningColor
+        : SHColors.lightWarningColor;
+    final errColor = isDark
+        ? SHColors.darkErrorColor
+        : SHColors.lightErrorColor;
+    final shadow = SHColors.shadow(context);
+    final l10n = AppLocalizations.of(context);
 
-    return DraggableScrollableSheet(
-      initialChildSize: 0.72,
-      minChildSize: 0.5,
-      maxChildSize: 0.92,
-      builder: (_, scroll) => Container(
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
-        ),
-        child: ListView(
-          controller: scroll,
-          padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 32.h),
-          children: [
-            // Handle
-            Center(
-              child: Container(
-                width: 40.w,
-                height: 4.h,
-                decoration: BoxDecoration(
-                  color: hintColor.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(2.r),
-                ),
-              ),
+    return BlocListener<DevicesCubit, DevicesState>(
+      listener: (context, state) {
+        if (state is DevicesError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: errColor,
+              duration: const Duration(seconds: 3),
             ),
-            SizedBox(height: 20.h),
+          );
+        }
+      },
+      child: BlocBuilder<DevicesCubit, DevicesState>(
+        builder: (context, state) {
+          DeviceModel current = device;
+          if (state is DevicesLoaded) {
+            current = state.devices.firstWhere(
+              (d) => d.id == device.id,
+              orElse: () => device,
+            );
+          }
 
-            // ── Device header ──────────────────────────────────────────
-            Row(
-              children: [
-                Container(
-                  width: 56.w,
-                  height: 56.w,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isOn
-                        ? primary.withOpacity(0.15)
-                        : hintColor.withOpacity(0.1),
+          final isPowerOn = current.simulationData?.isOn ?? false;
+          final hwOnline =
+              current.hardwareSensor?.status == SensorStatus.online;
+
+          return DraggableScrollableSheet(
+            initialChildSize: 0.65,
+            minChildSize: 0.4,
+            maxChildSize: 0.95,
+            builder: (_, scroll) => Container(
+              decoration: BoxDecoration(
+                color: bg,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(36.r)),
+                boxShadow: [
+                  BoxShadow(
+                    color: shadow,
+                    blurRadius: 20,
+                    offset: const Offset(0, -4),
                   ),
-                  child: Icon(
-                    _iconFor(device.type),
-                    color: isOn ? primary : hintColor,
-                    size: 28.sp,
+                ],
+              ),
+              child: ListView(
+                controller: scroll,
+                padding: EdgeInsetsDirectional.fromSTEB(20.w, 12.h, 20.w, 32.h),
+                children: [
+                  _SheetHandle(hintColor: hintColor),
+                  SizedBox(height: 24.h),
+
+                  // 1. Header
+                  _ModernSheetHeader(
+                    device: current,
+                    isPowerOn: isPowerOn,
+                    hwOnline: hwOnline,
+                    textColor: textColor,
+                    hintColor: hintColor,
+                    primary: primary,
+                    l10n: l10n,
+                    onPowerChanged: (val) => context
+                        .read<DevicesCubit>()
+                        .toggleSimulation(device.id, val),
                   ),
-                ),
-                SizedBox(width: 14.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        device.name,
-                        style: TextStyle(
-                          fontSize: 17.sp,
-                          fontWeight: FontWeight.w700,
-                          color: textColor,
-                        ),
-                      ),
-                      SizedBox(height: 3.h),
-                      Row(
+                  SizedBox(height: 24.h),
+
+                  // 2. Parallel panels
+                  AnimatedOpacity(
+                    duration: const Duration(milliseconds: 250),
+                    opacity: isPowerOn ? 1.0 : 0.45,
+                    child: IgnorePointer(
+                      ignoring: !isPowerOn,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            width: 8.w,
-                            height: 8.w,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: isOn
-                                  ? Colors.greenAccent.shade400
-                                  : hintColor.withOpacity(0.5),
+                          Expanded(
+                            flex: 11,
+                            child: DeviceDataPanel(
+                              label: l10n.simulation,
+                              accentColor: primary,
+                              data: current.simulationData,
+                              textColor: textColor,
+                              hintColor: hintColor,
+                              noDataText: l10n.noData,
+                              statusLabel: l10n.status,
+                              wattsLabel: l10n.watts,
+                              kwhLabel: l10n.kwh,
+                              voltsLabel: l10n.volts,
+                              ampsLabel: l10n.amps,
                             ),
                           ),
-                          SizedBox(width: 5.w),
-                          Text(
-                            isOn ? 'Online · ON' : 'Offline · OFF',
-                            style: TextStyle(
-                              fontSize: 11.sp,
-                              color: isOn
-                                  ? Colors.greenAccent.shade400
-                                  : hintColor,
+                          SizedBox(width: 12.w),
+
+                          // Hardware panel (display-only)
+                          Expanded(
+                            flex: 9,
+                            child: Container(
+                              height: 215.h,
+                              padding: EdgeInsets.all(12.w),
+                              decoration: BoxDecoration(
+                                color: amber.withOpacity(0.02),
+                                borderRadius: BorderRadius.circular(20.r),
+                                border: Border.all(
+                                  color: amber.withOpacity(0.08),
+                                  width: 1.2,
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        l10n.hardware.toUpperCase(),
+                                        style: TextStyle(
+                                          fontSize: 10.sp,
+                                          fontWeight: FontWeight.w800,
+                                          color: amber.withOpacity(0.5),
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 24.w,
+                                        height: 14.h,
+                                        child: Transform.scale(
+                                          scale: 0.6,
+                                          alignment:
+                                              AlignmentDirectional.centerEnd,
+                                          child: Switch.adaptive(
+                                            value: false,
+                                            activeColor: amber,
+                                            onChanged: null,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const Spacer(),
+                                  Center(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          padding: EdgeInsets.all(10.w),
+                                          decoration: BoxDecoration(
+                                            color: amber.withOpacity(0.04),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            Icons.developer_board_rounded,
+                                            size: 22.sp,
+                                            color: amber.withOpacity(0.3),
+                                          ),
+                                        ),
+                                        SizedBox(height: 10.h),
+                                        Text(
+                                          l10n.hwControl,
+                                          style: TextStyle(
+                                            fontSize: 11.sp,
+                                            fontWeight: FontWeight.w700,
+                                            color: textColor.withOpacity(0.5),
+                                          ),
+                                        ),
+                                        SizedBox(height: 2.h),
+                                        Text(
+                                          l10n.hwSource,
+                                          style: TextStyle(
+                                            fontSize: 8.5.sp,
+                                            fontWeight: FontWeight.w500,
+                                            color: hintColor.withOpacity(0.4),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                ],
+                              ),
                             ),
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-                // Toggle
-                Transform.scale(
-                  scale: 0.9,
-                  child: Switch.adaptive(
-                    value: isOn,
-                    activeColor: primary,
-                    onChanged: (val) {
-                      context.read<DevicesCubit>().toggleDevice(device.id, val);
-                      Navigator.pop(context);
-                    },
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 24.h),
+                  SizedBox(height: 24.h),
 
-            // ── Two-column data panels ────────────────────────────────
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: _DataPanel(
-                    label: 'Simulation',
-                    accentColor: primary,
-                    data: device.simulationData,
-                    textColor: textColor,
-                    hintColor: hintColor,
-                  ),
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: _DataPanel(
-                    label: 'Hardware',
-                    accentColor: amber,
-                    data: device.hardwareData,
-                    textColor: textColor,
-                    hintColor: hintColor,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 20.h),
-
-            // ── Last updated ──────────────────────────────────────────
-            if (device.simulationData?.lastUpdated != null)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.update_rounded, size: 12, color: hintColor),
-                  SizedBox(width: 4.w),
-                  Text(
-                    'Last updated: ${DateFormat('MMM d, HH:mm').format(
-                      device.simulationData!.lastUpdated!.toLocal(),
-                    )}',
-                    style: TextStyle(fontSize: 10.sp, color: hintColor),
-                  ),
+                  // 3. Timestamp
+                  if (current.simulationData?.lastUpdated != null && isPowerOn)
+                    _LastUpdatedRow(
+                      date: current.simulationData!.lastUpdated!.toLocal(),
+                      label: l10n.lastUpdated,
+                      hintColor: hintColor,
+                    ),
                 ],
               ),
-          ],
-        ),
+            ),
+          );
+        },
       ),
     );
   }
-
-  IconData _iconFor(DeviceType type) {
-    switch (type) {
-      case DeviceType.lamp:
-        return Icons.lightbulb_outline;
-      case DeviceType.fan:
-        return Icons.air;
-      case DeviceType.ac:
-        return Icons.ac_unit;
-      case DeviceType.tv:
-        return Icons.tv;
-      case DeviceType.washer:
-        return Icons.local_laundry_service;
-      case DeviceType.fridge:
-        return Icons.kitchen;
-      case DeviceType.heater:
-        return Icons.whatshot_outlined;
-      case DeviceType.speaker:
-        return Icons.speaker;
-    }
-  }
 }
 
-// ─── Data panel (Simulation or Hardware) ──────────────────────────────────────
-class _DataPanel extends StatelessWidget {
-  const _DataPanel({
-    required this.label,
-    required this.accentColor,
-    required this.data,
-    required this.textColor,
-    required this.hintColor,
-  });
-
-  final String label;
-  final Color accentColor;
-  final DeviceData? data;
-  final Color textColor;
+class _SheetHandle extends StatelessWidget {
+  const _SheetHandle({required this.hintColor});
   final Color hintColor;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(14.w),
+  Widget build(BuildContext context) => Center(
+    child: Container(
+      width: 42.w,
+      height: 4.h,
       decoration: BoxDecoration(
-        color: accentColor.withOpacity(0.07),
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: accentColor.withOpacity(0.25)),
+        color: hintColor.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(2.r),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Panel label
-          Row(
+    ),
+  );
+}
+
+class _ModernSheetHeader extends StatelessWidget {
+  const _ModernSheetHeader({
+    required this.device,
+    required this.isPowerOn,
+    required this.hwOnline,
+    required this.textColor,
+    required this.hintColor,
+    required this.primary,
+    required this.l10n,
+    required this.onPowerChanged,
+  });
+
+  final DeviceModel device;
+  final bool isPowerOn, hwOnline;
+  final Color textColor, hintColor, primary;
+  final AppLocalizations l10n;
+  final ValueChanged<bool> onPowerChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          padding: EdgeInsets.all(10.w),
+          decoration: BoxDecoration(
+            color: isPowerOn
+                ? primary.withOpacity(0.08)
+                : hintColor.withOpacity(0.05),
+            shape: BoxShape.circle,
+          ),
+          child: SizedBox(
+            height: 26.h,
+            width: 26.w,
+            child: DeviceIcon(
+              type: device.type,
+              isOn: isPowerOn,
+              hwOnline: hwOnline,
+              primary: primary,
+              hint: hintColor,
+            ),
+          ),
+        ),
+        SizedBox(width: 12.w),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 8.w,
-                height: 8.w,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: data != null ? accentColor : hintColor,
-                ),
-              ),
-              SizedBox(width: 6.w),
               Text(
-                label,
+                l10n.translateDeviceOrRoomName(device.name),
                 style: TextStyle(
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.w700,
-                  color: accentColor,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w800,
+                  color: textColor,
+                  letterSpacing: 0.3,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              SizedBox(height: 3.h),
+              Text(
+                isPowerOn ? l10n.simSource : l10n.powerOff,
+                style: TextStyle(
+                  fontSize: 10.5.sp,
+                  fontWeight: FontWeight.w500,
+                  color: isPowerOn ? primary : hintColor.withOpacity(0.6),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 10.h),
-
-          if (data == null) ...[
-            Icon(Icons.cloud_off_outlined, size: 22, color: hintColor),
-            SizedBox(height: 4.h),
-            Text(
-              'No data yet',
-              style: TextStyle(fontSize: 10.sp, color: hintColor),
+        ),
+        SizedBox(width: 12.w),
+        SizedBox(
+          width: 34.w,
+          height: 20.h,
+          child: Transform.scale(
+            scale: 0.72,
+            alignment: AlignmentDirectional.centerEnd,
+            child: Switch.adaptive(
+              value: isPowerOn,
+              activeColor: primary,
+              onChanged: onPowerChanged,
             ),
-          ] else ...[
-            _Row('Status', data!.status, textColor, hintColor,
-                bold: true,
-                valueColor:
-                    data!.isOn ? Colors.greenAccent.shade400 : hintColor),
-            if (data!.watts != null)
-              _Row('Watts', '${data!.watts!.toStringAsFixed(1)} W', textColor,
-                  hintColor),
-            if (data!.kwh != null)
-              _Row('kWh', data!.kwh!.toStringAsFixed(3), textColor, hintColor),
-            if (data!.volts != null)
-              _Row('Volts', '${data!.volts!.toStringAsFixed(1)} V', textColor,
-                  hintColor),
-            if (data!.amps != null)
-              _Row('Amps', '${data!.amps!.toStringAsFixed(2)} A', textColor,
-                  hintColor),
-          ],
-        ],
-      ),
+          ),
+        ),
+      ],
     );
   }
 }
 
-class _Row extends StatelessWidget {
-  const _Row(
-    this.label,
-    this.value,
-    this.textColor,
-    this.hintColor, {
-    this.bold = false,
-    this.valueColor,
+class _LastUpdatedRow extends StatelessWidget {
+  const _LastUpdatedRow({
+    required this.date,
+    required this.label,
+    required this.hintColor,
   });
-
+  final DateTime date;
   final String label;
-  final String value;
-  final Color textColor;
   final Color hintColor;
-  final bool bold;
-  final Color? valueColor;
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 5.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(fontSize: 10.5.sp, color: hintColor),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 10.5.sp,
-              fontWeight: bold ? FontWeight.w700 : FontWeight.w500,
-              color: valueColor ?? textColor,
-            ),
-          ),
-        ],
+  Widget build(BuildContext context) => Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Icon(
+        Icons.history_toggle_off_rounded,
+        size: 12.sp,
+        color: hintColor.withOpacity(0.5),
       ),
-    );
-  }
+      SizedBox(width: 5.w),
+      Text(
+        '$label: ${DateFormat('MMM d, HH:mm').format(date)}',
+        style: TextStyle(
+          fontSize: 10.sp,
+          color: hintColor.withOpacity(0.5),
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    ],
+  );
 }

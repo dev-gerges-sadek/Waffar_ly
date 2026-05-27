@@ -1,6 +1,7 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/shared/presentation/widgets/sh_card.dart';
 import '../../../core/theme/sh_colors.dart';
@@ -11,19 +12,15 @@ class HardwareControlsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+    final l10n      = AppLocalizations.of(context);
     final textColor = SHColors.text(context);
     final hintColor = SHColors.hint(context);
 
-    // Dimmed/disabled appearance
-    final disabledOpacity = 0.5;
-
     return Opacity(
-      opacity: disabledOpacity,
+      opacity: 0.5,
       child: SHCard(
         childrenPadding: EdgeInsets.all(12.w),
         children: [
-          // ── Header: title + power button (disabled) ────────────────
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -38,9 +35,8 @@ class HardwareControlsCard extends StatelessWidget {
               SizedBox(height: 12.h),
               Row(
                 children: [
-                  // Disabled power button
                   Container(
-                    padding: EdgeInsets.symmetric(
+                    padding: EdgeInsetsDirectional.symmetric(
                       horizontal: 12.w,
                       vertical: 8.h,
                     ),
@@ -55,14 +51,12 @@ class HardwareControlsCard extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          SHIcons.fan,
-                          size: 14.sp,
-                          color: hintColor.withOpacity(0.6),
-                        ),
+                        Icon(SHIcons.fan,
+                            size: 14.sp,
+                            color: hintColor.withOpacity(0.6)),
                         SizedBox(width: 6.w),
                         Text(
-                          'OFF',
+                          l10n.powerOff,
                           style: TextStyle(
                             fontSize: 11.sp,
                             fontWeight: FontWeight.w600,
@@ -74,9 +68,8 @@ class HardwareControlsCard extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
-                  // Disabled status indicator
                   Container(
-                    padding: EdgeInsets.symmetric(
+                    padding: EdgeInsetsDirectional.symmetric(
                       horizontal: 10.w,
                       vertical: 6.h,
                     ),
@@ -98,31 +91,24 @@ class HardwareControlsCard extends StatelessWidget {
               ),
             ],
           ),
-
-          // ── Info message ──────────────────────────────────────────
           Container(
-            padding: EdgeInsets.symmetric(
+            padding: EdgeInsetsDirectional.symmetric(
               horizontal: 12.w,
               vertical: 10.h,
             ),
             decoration: BoxDecoration(
               color: hintColor.withOpacity(0.08),
               borderRadius: BorderRadius.circular(8.r),
-              border: Border.all(
-                color: hintColor.withOpacity(0.15),
-              ),
+              border: Border.all(color: hintColor.withOpacity(0.15)),
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.info_outline,
-                  size: 16.sp,
-                  color: hintColor.withOpacity(0.6),
-                ),
+                Icon(Icons.info_outline,
+                    size: 16.sp, color: hintColor.withOpacity(0.6)),
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
-                    'Hardware control is currently unavailable',
+                    l10n.notConnected,
                     style: TextStyle(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w500,

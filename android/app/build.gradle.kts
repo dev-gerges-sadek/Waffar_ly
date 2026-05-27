@@ -19,6 +19,13 @@ android {
         jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
+    tasks.withType<JavaCompile> {
+        options.compilerArgs.addAll(listOf(
+            "-Xlint:-unchecked",
+            "-Xlint:-deprecation"
+        ))
+    }
+
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.waffar_ly_app"

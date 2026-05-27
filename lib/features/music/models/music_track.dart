@@ -6,7 +6,8 @@ class MusicTrack {
     required this.album,
     required this.artworkUrl,
     required this.previewUrl,
-    required this.trackTimeMillis,
+    required this.durationSeconds,
+    this.deezerUrl = '',
   });
 
   final int    id;
@@ -14,26 +15,32 @@ class MusicTrack {
   final String artist;
   final String album;
   final String artworkUrl;
-  final String previewUrl;
-  final int    trackTimeMillis;
+  final String previewUrl;   // 30-sec MP3 preview
+  final int    durationSeconds;
+  final String deezerUrl;
 
   String get duration {
-    final total = trackTimeMillis ~/ 1000;
-    final m = total ~/ 60;
-    final s = total % 60;
+    final m = durationSeconds ~/ 60;
+    final s = durationSeconds % 60;
     return '$m:${s.toString().padLeft(2, '0')}';
   }
 
-  factory MusicTrack.fromJson(Map<String, dynamic> json) {
+  /// Maps one Deezer track JSON object.
+  /// Deezer API: https://api.deezer.com/search?q=query
+  factory MusicTrack.fromDeezer(Map<String, dynamic> j) {
+    final album  = j['album']  as Map<String, dynamic>? ?? {};
+    final artist = j['artist'] as Map<String, dynamic>? ?? {};
     return MusicTrack(
-      id:               json['trackId']       as int,
-      title:            json['trackName']     as String,
-      artist:           json['artistName']    as String,
-      album:            json['collectionName']as String? ?? '',
-      artworkUrl:       (json['artworkUrl100'] as String?)
-                            ?.replaceAll('100x100', '300x300') ?? '',
-      previewUrl:       json['previewUrl']    as String? ?? '',
-      trackTimeMillis:  json['trackTimeMillis'] as int? ?? 0,
+      id:              j['id'] is int ? j['id'] as int : int.tryParse(j['id'].toString()) ?? 0,
+      title:           j['title']           as String? ?? '',
+      artist:          artist['name']       as String? ?? '',
+      album:           album['title']       as String? ?? '',
+      artworkUrl:      album['cover_medium'] as String? ?? album['cover'] as String? ?? '',
+      previewUrl:      j['preview']         as String? ?? '',
+      durationSeconds: j['duration'] is int
+          ? j['duration'] as int
+          : int.tryParse(j['duration'].toString()) ?? 0,
+      deezerUrl:       j['link']            as String? ?? '',
     );
   }
 }

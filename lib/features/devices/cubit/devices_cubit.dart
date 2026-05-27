@@ -1,103 +1,165 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 
 import '../models/device_model.dart';
+import '../../devices/domain/repositories/device_repository.dart';
 import 'devices_states.dart';
 
 class DevicesCubit extends Cubit<DevicesState> {
-  DevicesCubit() : super(DevicesInitial());
+  DevicesCubit()
+    : _repository = GetIt.I<DeviceRepository>(),
+      super(DevicesInitial());
 
-  final _firestore = FirebaseFirestore.instance;
-  StreamSubscription? _simSub;
-  StreamSubscription? _hwSub;
-
-  // Current loaded devices list (merged sim + hw)
+  final DeviceRepository _repository;
+  StreamSubscription<List<DeviceModel>>? _deviceSub;
   final Map<String, DeviceModel> _devices = {};
 
-  /// Load devices for a specific room.
-  /// [roomKey] e.g. 'living_room', deviceIds e.g. ['Lamp_LR_01', 'Fan_LR_01']
   void loadDevicesForRoom(String roomKey) {
     emit(DevicesLoading());
     _devices.clear();
-
-    final deviceIds = kRoomDevices[roomKey] ?? [];
-
-    // Build initial device list (no data yet)
-    for (final id in deviceIds) {
-      _devices[id] = DeviceModel(
-        id: id,
-        name: _formatName(id),
-        type: id.toDeviceType(),
-        roomId: roomKey,
-      );
-    }
-
-    // ── Simulation stream ──────────────────────────────────────────────────
-    _simSub?.cancel();
-    _simSub = _firestore
-        .collection('device_states')
-        .snapshots()
-        .listen((snapshot) {
-      for (final doc in snapshot.docs) {
-        if (deviceIds.contains(doc.id)) {
-          final current = _devices[doc.id];
-          if (current != null) {
-            _devices[doc.id] = current.copyWith(
-              simulationData: DeviceData.fromFirestore(doc.data()),
-            );
-          }
-        }
+    _deviceSub?.cancel();
+    _deviceSub = _repository.watchDevicesForRoom(roomKey).listen((devices) {
+      for (final d in devices) {
+        _devices[d.id] = d;
       }
       _emitLoaded();
-    }, onError: (e) => emit(DevicesError(e.toString())));
-
-    // ── Hardware stream ────────────────────────────────────────────────────
-    // The hardware team will use a separate collection: 'device_states_hw'
-    _hwSub?.cancel();
-    _hwSub = _firestore
-        .collection('device_states_hw')
-        .snapshots()
-        .listen((snapshot) {
-      for (final doc in snapshot.docs) {
-        if (deviceIds.contains(doc.id)) {
-          final current = _devices[doc.id];
-          if (current != null) {
-            _devices[doc.id] = current.copyWith(
-              hardwareData: DeviceData.fromFirestore(doc.data()),
-            );
-          }
-        }
-      }
-      _emitLoaded();
-    }, onError: (_) {
-      // Hardware data not available yet — just ignore
-    });
+    }, onError: (Object e) => emit(DevicesError(e.toString())));
   }
 
-  /// Toggle device ON/OFF in Firestore simulation collection
+  /// Toggles active source (hardware-first via CombinedRepo).
   Future<void> toggleDevice(String deviceId, bool newStatus) async {
+    final current = _devices[deviceId];
+    if (current == null) return;
+
+    // Determine which source is active and update only that source
+    final isHardwareActive = current.hardwareData?.isOn ?? false;
+
+    // ── Optimistic update ───────────────────────────────────────────
+    final updated = isHardwareActive
+        ? current.copyWith(
+            hardwareData: current.hardwareData?.copyWith(
+              status: newStatus ? 'ON' : 'OFF',
+            ),
+            simulationData: current.simulationData, // Preserve simulation
+          )
+        : current.copyWith(
+            simulationData: current.simulationData?.copyWith(
+              status: newStatus ? 'ON' : 'OFF',
+            ),
+            hardwareData: current.hardwareData, // Preserve hardware
+          );
+    _devices[deviceId] = updated;
+    _emitLoaded();
+
     try {
-      await _firestore.collection('device_states').doc(deviceId).update({
-        'status': newStatus ? 'ON' : 'OFF',
-        'last_updated': FieldValue.serverTimestamp(),
-      });
-    } catch (_) {}
+      await _repository.toggleDevice(current, newStatus);
+    } on Exception catch (e) {
+      debugPrint('[DevicesCubit] toggleDevice error: $e');
+      // Revert on error
+      _devices[deviceId] = current;
+      _emitLoaded();
+      // Emit error state so UI can show feedback
+      if (!isClosed) {
+        emit(DevicesError('Failed to toggle device: ${e.toString()}'));
+        // Re-emit loaded state after showing error
+        await Future.delayed(const Duration(seconds: 2));
+        if (!isClosed) _emitLoaded();
+      }
+    }
+  }
+
+  /// Force-toggle Firestore simulation source only.
+  Future<void> toggleSimulation(String deviceId, bool newStatus) async {
+    final current = _devices[deviceId];
+    if (current == null) return;
+
+    // ── Preserve all hardware state (critical for decoupled toggles) ────
+    final preservedHardwareData = current.hardwareData;
+    final preservedHardwareSensor = current.hardwareSensor;
+
+    // ── Optimistic update: update local state immediately ───────────
+    final updated = current.copyWith(
+      simulationData: current.simulationData?.copyWith(
+        status: newStatus ? 'ON' : 'OFF',
+      ),
+      // Explicitly preserve hardware state to prevent any state bleed
+      hardwareData: preservedHardwareData,
+      hardwareSensor: preservedHardwareSensor,
+      source: DeviceSourceType.simulation, // ← Explicit source
+    );
+    _devices[deviceId] = updated;
+    _emitLoaded(); // UI updates immediately
+
+    try {
+      // ← Send the UPDATED device with new simulation status
+      await _repository.toggleDevice(updated, newStatus);
+    } on Exception catch (e) {
+      debugPrint('[DevicesCubit] toggleSimulation error: $e');
+      // Revert on error
+      _devices[deviceId] = current;
+      _emitLoaded();
+      // Emit error state so UI can show feedback
+      if (!isClosed) {
+        emit(DevicesError('Failed to toggle simulation: ${e.toString()}'));
+        // Re-emit loaded state after showing error
+        await Future.delayed(const Duration(seconds: 2));
+        if (!isClosed) _emitLoaded();
+      }
+    }
+  }
+
+  /// Force-toggle RTDB hardware source only.
+  Future<void> toggleHardware(String deviceId, bool newStatus) async {
+    final current = _devices[deviceId];
+    if (current == null) return;
+
+    // ── Preserve all simulation state (critical for decoupled toggles) ────
+    final preservedSimulationData = current.simulationData;
+
+    // ── Optimistic update: update local state immediately ───────────
+    final updated = current.copyWith(
+      hardwareData: current.hardwareData?.copyWith(
+        status: newStatus ? 'ON' : 'OFF',
+      ),
+      // Explicitly preserve simulation state to prevent any state bleed
+      simulationData: preservedSimulationData,
+      source: DeviceSourceType.hardware, // ← Explicit source
+    );
+    _devices[deviceId] = updated;
+    _emitLoaded(); // UI updates immediately
+
+    try {
+      // ← Send the UPDATED device with new hardware status
+      await _repository.toggleDevice(updated, newStatus);
+    } on Exception catch (e) {
+      debugPrint('[DevicesCubit] toggleHardware error: $e');
+      // Revert on error
+      _devices[deviceId] = current;
+      _emitLoaded();
+      // Emit error state so UI can show feedback
+      if (!isClosed) {
+        emit(DevicesError('Failed to toggle hardware: ${e.toString()}'));
+        // Re-emit loaded state after showing error
+        await Future.delayed(const Duration(seconds: 2));
+        if (!isClosed) _emitLoaded();
+      }
+    }
   }
 
   void _emitLoaded() {
-    if (!isClosed) emit(DevicesLoaded(List.unmodifiable(_devices.values)));
-  }
-
-  String _formatName(String id) {
-    // "Lamp_LR_01" → "Lamp LR 01"
-    return id.replaceAll('_', ' ');
+    if (isClosed) return;
+    final list = List<DeviceModel>.unmodifiable(_devices.values);
+    final onlineHw = list
+        .where((d) => d.hardwareSensor?.status == SensorStatus.online)
+        .length;
+    emit(DevicesLoaded(list, hwOnlineCount: onlineHw));
   }
 
   @override
   Future<void> close() {
-    _simSub?.cancel();
-    _hwSub?.cancel();
+    _deviceSub?.cancel();
     return super.close();
   }
 }

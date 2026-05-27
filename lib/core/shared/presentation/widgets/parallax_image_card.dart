@@ -23,12 +23,12 @@ class ParallaxImageCard extends StatelessWidget {
             borderRadius: const BorderRadius.all(Radius.circular(12)),
             color: SHColors.lightHintColor,
             boxShadow: const [
-              BoxShadow(color: Colors.black26, blurRadius: 12, offset: Offset(-7, 7)),
+              BoxShadow(color: SHColors.lightShadowColor, blurRadius: 12, offset: Offset(-7, 7)),
             ],
             image: DecorationImage(
               image: AssetImage(imageUrl),
               fit: BoxFit.cover,
-              colorFilter: const ColorFilter.mode(Colors.black26, BlendMode.colorBurn),
+              colorFilter: const ColorFilter.mode(SHColors.lightShadowColor, BlendMode.colorBurn),
               alignment: Alignment(lerpDouble(.5, -.5, parallaxValue)!, 0),
             ),
           ),

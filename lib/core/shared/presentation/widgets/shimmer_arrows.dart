@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:waffar_ly_app/core/theme/sh_colors.dart';
 
 import '../../../theme/sh_icons.dart';
 
@@ -30,7 +31,7 @@ class _ShimmerArrowsState extends State<ShimmerArrows>
 
   Gradient get gradient {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDarkMode ? Colors.white : Colors.black;
+    final baseColor = isDarkMode ? SHColors.darkTextColor : SHColors.lightTextColor;
 
     return LinearGradient(
       begin: Alignment.topCenter,

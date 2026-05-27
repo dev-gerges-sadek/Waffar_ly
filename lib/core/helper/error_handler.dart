@@ -1,4 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 
 class AppException implements Exception {
   const AppException(this.message);
@@ -7,26 +9,31 @@ class AppException implements Exception {
   String toString() => message;
 }
 
+/// Returns a localised, user-facing error string.
+/// All string literals live in [AppLocalizations] — none are hardcoded here.
+String handleError(Object e, BuildContext context) {
+  final l = AppLocalizations.of(context);
 
-String handleError(Object e) {
   if (e is FirebaseAuthException) {
     return switch (e.code) {
-      'user-not-found'        => 'No account found with this email.',
-      'wrong-password'        => 'Incorrect password. Please try again.',
-      'email-already-in-use'  => 'This email is already registered.',
-      'weak-password'         => 'Password must be at least 6 characters.',
-      'invalid-email'         => 'Please enter a valid email address.',
-      'too-many-requests'     => 'Too many attempts. Please wait and try again.',
-      'network-request-failed'=> 'No internet connection.',
-      'user-disabled'         => 'This account has been disabled.',
-      'operation-not-allowed' => 'This sign-in method is not enabled.',
-      _                       => 'Authentication error. Please try again.',
+      'user-not-found'         => l.errUserNotFound,
+      'wrong-password'         => l.errWrongPassword,
+      'email-already-in-use'   => l.errEmailInUse,
+      'weak-password'          => l.errWeakPassword,
+      'invalid-email'          => l.errInvalidEmail,
+      'too-many-requests'      => l.errTooManyRequests,
+      'network-request-failed' => l.errNoNetwork,
+      'user-disabled'          => l.errDisabledAccount,
+      'operation-not-allowed'  => l.errOperationNotAllowed,
+      _                        => l.errAuthGeneric,
     };
   }
+
   if (e is AppException) return e.message;
-  final msg = e.toString();
+
+  final msg = e.toString().toLowerCase();
   if (msg.contains('network') || msg.contains('socket')) {
-    return 'No internet connection.';
+    return l.errNoNetwork;
   }
-  return 'Something went wrong. Please try again.';
+  return l.errGeneric;
 }

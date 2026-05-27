@@ -1,18 +1,15 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:waffar_ly_app/core/shared/domain/entities/smart_room.dart';
-import 'package:waffar_ly_app/core/shared/presentation/widgets/parallax_image_card.dart';
-import 'package:waffar_ly_app/core/shared/presentation/widgets/sh_app_bar.dart';
+import '../../../core/l10n/app_localizations.dart';
+import '../../../core/shared/domain/entities/smart_room.dart';
+import '../../../core/shared/presentation/widgets/parallax_image_card.dart';
+import '../../../core/shared/presentation/widgets/sh_app_bar.dart';
 import '../../../core/shared/presentation/widgets/room_card.dart';
 import '../widgets/room_details_page_view.dart';
 
 class RoomDetailScreen extends StatelessWidget {
-  const RoomDetailScreen({
-    required this.room,
-    super.key,
-  });
-
+  const RoomDetailScreen({required this.room, super.key});
   final SmartRoom room;
 
   @override
@@ -42,13 +39,16 @@ class RoomDetailItems extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
     final outDx = 200 * animation.value;
     final outDy = 100 * animation.value;
     final sigma = 10 * animation.value;
+
     return Hero(
       tag: room.id,
       child: Stack(
-        alignment: Alignment.center,
+        alignment: AlignmentDirectional.center,
         fit: StackFit.expand,
         children: [
           ParallaxImageCard(imageUrl: room.imageUrl),
@@ -58,9 +58,6 @@ class RoomDetailItems extends StatelessWidget {
               child: const ColoredBox(color: Colors.transparent),
             ),
           ),
-          // --------------------------------------------
-          // Animated output elements
-          // --------------------------------------------
           FadeTransition(
             opacity: Tween<double>(begin: 1, end: 0).animate(animation),
             child: Stack(
@@ -80,31 +77,54 @@ class RoomDetailItems extends StatelessWidget {
               ],
             ),
           ),
-          // --------------------------------------------
-          // Animated room controls
-          // --------------------------------------------
           FadeTransition(
             opacity: animation,
             child: Container(
-              transform:
-                  Matrix4.translationValues(0, -200 * (1 - animation.value), 0),
-              padding: EdgeInsets.only(top: topPadding + 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    room.name.replaceAll(' ', '\n'),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w600, color: Colors.white, height: 0.9),
-                  ),
-                  const Text('SETTINGS', textAlign: TextAlign.center),
-                  Expanded(
-                    child: RoomDetailsPageView(
-                      animation: animation,
-                      room: room,
+              transform: Matrix4.translationValues(
+                0,
+                -200 * (1 - animation.value),
+                0,
+              ),
+              padding: EdgeInsetsDirectional.only(top: topPadding + 12),
+              child: LayoutBuilder(
+                builder: (context, constraints) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: AlignmentDirectional.center,
+                      child: Text(
+                        l10n
+                            .translateDeviceOrRoomName(room.name)
+                            .replaceAll(' ', '\n'),
+                        textAlign: TextAlign.center,
+                        maxLines: 3,
+                        style: TextStyle(
+                          fontSize: 24.sp,
+                          fontWeight: FontWeight.w600,
+                          color: onPrimary,
+                          height: 0.9,
+                        ),
+                      ),
                     ),
-                  )
-                ],
+                    Text(
+                      l10n.settings.toUpperCase(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: onPrimary.withOpacity(0.75),
+                        letterSpacing: 1.2,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Expanded(
+                      child: RoomDetailsPageView(
+                        animation: animation,
+                        room: room,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

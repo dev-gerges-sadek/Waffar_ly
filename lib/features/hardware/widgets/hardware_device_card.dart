@@ -1,265 +1,165 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
+import '../../../core/l10n/app_localizations.dart';
 import '../../../core/theme/sh_colors.dart';
 import '../models/hardware_device.dart';
 
 class HardwareDeviceCard extends StatelessWidget {
-  const HardwareDeviceCard({
-    super.key,
-    required this.device,
-  });
-
+  const HardwareDeviceCard({super.key, required this.device});
   final HardwareDevice device;
-
-  Color get _statusColor {
-    switch (device.connectionStatus) {
-      case 'Connected':
-        return Colors.green;
-      case 'Reconnecting':
-        return Colors.orange;
-      case 'Disconnected':
-      default:
-        return Colors.red;
-    }
-  }
-
-  String get _statusEmoji {
-    switch (device.connectionStatus) {
-      case 'Connected':
-        return '✅';
-      case 'Reconnecting':
-        return '🟠';
-      case 'Disconnected':
-      default:
-        return '🔴';
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardColor = SHColors.card(context);
-    final textColor = SHColors.text(context);
-    final hintColor = SHColors.hint(context);
+    final isDark       = Theme.of(context).brightness == Brightness.dark;
+    final cardColor    = SHColors.card(context);
+    final textColor    = SHColors.text(context);
+    final hintColor    = SHColors.hint(context);
+    final primary      = SHColors.primary(context);
+    final amber        = isDark ? SHColors.darkWarningColor : SHColors.lightWarningColor;
+    final statusColor  = _safetyColor(context, device.safetyStatus);
 
     return Container(
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(
-          color: _statusColor.withOpacity(0.2),
-        ),
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(color: statusColor.withOpacity(0.35), width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: statusColor.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Header with status ─────────────────────────────────────────
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      device.displayName,
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w700,
-                        color: textColor,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      device.source,
-                      style: TextStyle(
-                        fontSize: 9.sp,
-                        color: hintColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
               Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 8.w,
-                  vertical: 4.h,
-                ),
+                padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: _statusColor.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(10.r),
+                  color: primary.withOpacity(0.12),
+                  shape: BoxShape.circle,
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      _statusEmoji,
-                      style: TextStyle(fontSize: 10.sp),
-                    ),
-                    SizedBox(width: 3.w),
-                    Text(
-                      device.connectionStatus,
-                      style: TextStyle(
-                        fontSize: 8.sp,
-                        fontWeight: FontWeight.w700,
-                        color: _statusColor,
-                        letterSpacing: 0.3,
-                      ),
-                    ),
-                  ],
-                ),
+                child: Icon(Icons.memory_rounded,
+                    color: primary, size: 18.sp),
               ),
-            ],
-          ),
-
-          SizedBox(height: 12.h),
-
-          // ── Telemetry grid ────────────────────────────────────────────
-          GridView.count(
-            crossAxisCount: 3,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 8.h,
-            crossAxisSpacing: 8.w,
-            childAspectRatio: 1.2,
-            children: [
-              _TelemetryCell(
-                label: 'Voltage',
-                value: device.voltage.toStringAsFixed(1),
-                unit: 'V',
-                isDark: isDark,
-              ),
-              _TelemetryCell(
-                label: 'Current',
-                value: device.current.toStringAsFixed(2),
-                unit: 'A',
-                isDark: isDark,
-              ),
-              _TelemetryCell(
-                label: 'Power',
-                value: device.power.toStringAsFixed(1),
-                unit: 'W',
-                isDark: isDark,
-              ),
-            ],
-          ),
-
-          SizedBox(height: 10.h),
-
-          // ── Last update info ───────────────────────────────────────────
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Status: ${device.status}',
-                style: TextStyle(
-                  fontSize: 9.sp,
-                  fontWeight: FontWeight.w600,
-                  color: hintColor,
-                ),
-              ),
-              Text(
-                'Updated: ${_formatTime(device.lastUpdate)}',
-                style: TextStyle(
-                  fontSize: 8.sp,
-                  color: hintColor.withOpacity(0.7),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _formatTime(DateTime dt) {
-    final now = DateTime.now();
-    final diff = now.difference(dt);
-
-    if (diff.inSeconds < 60) {
-      return 'just now';
-    } else if (diff.inMinutes < 60) {
-      return '${diff.inMinutes}m ago';
-    } else {
-      return '${diff.inHours}h ago';
-    }
-  }
-}
-
-class _TelemetryCell extends StatelessWidget {
-  const _TelemetryCell({
-    required this.label,
-    required this.value,
-    required this.unit,
-    required this.isDark,
-  });
-
-  final String label;
-  final String value;
-  final String unit;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    final bgColor = isDark
-        ? Colors.white.withOpacity(0.06)
-        : Colors.black.withOpacity(0.04);
-    final textColor = SHColors.text(context);
-    final hintColor = SHColors.hint(context);
-
-    return Container(
-      padding: EdgeInsets.all(6.w),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(8.r),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 7.sp,
-              fontWeight: FontWeight.w600,
-              color: hintColor,
-            ),
-          ),
-          RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: value,
+              SizedBox(width: 8.w),
+              Expanded(
+                child: Text(
+                  device.displayName,
                   style: TextStyle(
-                    fontSize: 10.sp,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w700,
                     color: textColor,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                TextSpan(
-                  text: unit,
-                  style: TextStyle(
-                    fontSize: 6.sp,
-                    fontWeight: FontWeight.w500,
-                    color: hintColor,
-                  ),
+              ),
+              Container(
+                width: 8.w,
+                height: 8.w,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: statusColor,
+                  boxShadow: [
+                    BoxShadow(
+                        color: statusColor.withOpacity(0.5),
+                        blurRadius: 6),
+                  ],
                 ),
-              ],
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          _ReadingRow(
+              label: AppLocalizations.of(context).voltage,
+              value: '${device.voltage.toStringAsFixed(1)} V',
+              valueColor: amber,
+              hintColor: hintColor),
+          _ReadingRow(
+              label: AppLocalizations.of(context).amperes,
+              value: '${device.current.toStringAsFixed(2)} A',
+              valueColor: primary,
+              hintColor: hintColor),
+          _ReadingRow(
+              label: AppLocalizations.of(context).watts,
+              value: '${device.power.toStringAsFixed(1)} W',
+              valueColor: SHColors.success(context),
+              hintColor: hintColor),
+          if (device.kwh != null)
+            _ReadingRow(
+                label: AppLocalizations.of(context).kwh,
+                value: device.kwh!.toStringAsFixed(3),
+                valueColor: hintColor,
+                hintColor: hintColor),
+          if (device.status != null)
+            _ReadingRow(
+                label: AppLocalizations.of(context).status,
+                value: device.status!,
+                // tealAccent → primary (same visual intent: live/active)
+                valueColor: primary,
+                hintColor: hintColor),
+          SizedBox(height: 8.h),
+          Container(
+            padding: EdgeInsetsDirectional.symmetric(
+                horizontal: 6.w, vertical: 2.h),
+            decoration: BoxDecoration(
+              color: primary.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(6.r),
+            ),
+            child: Text(
+              device.source,
+              style: TextStyle(
+                  fontSize: 8.sp,
+                  color: primary,
+                  fontWeight: FontWeight.w600),
             ),
           ),
         ],
       ),
     );
   }
+
+  Color _safetyColor(BuildContext context, HardwareSafetyStatus s) =>
+      switch (s) {
+        HardwareSafetyStatus.idle     => SHColors.hint(context),
+        HardwareSafetyStatus.normal   => SHColors.severity(context, 'normal'),
+        HardwareSafetyStatus.warning  => SHColors.severity(context, 'warning'),
+        HardwareSafetyStatus.critical => SHColors.severity(context, 'critical'),
+      };
+}
+
+class _ReadingRow extends StatelessWidget {
+  const _ReadingRow({
+    required this.label,
+    required this.value,
+    required this.valueColor,
+    required this.hintColor,
+  });
+
+  final String label, value;
+  final Color  valueColor, hintColor;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: EdgeInsetsDirectional.only(bottom: 4.h),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label,
+                style:
+                    TextStyle(fontSize: 10.5.sp, color: hintColor)),
+            Text(value,
+                style: TextStyle(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w700,
+                    color: valueColor)),
+          ],
+        ),
+      );
 }

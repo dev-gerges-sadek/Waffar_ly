@@ -1,12 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../core/constants/app_constants.dart';
+import 'package:waffar_ly_app/features/devices/data/devices_firestore_source.dart';
+import 'package:waffar_ly_app/features/devices/domain/repositories/device_repository.dart';
 import '../../devices/models/device_model.dart';
-import '../devices_firestore_source.dart';
-import '../../domain/repositories/device_repository.dart';
 
 class SimulationDeviceRepositoryImpl implements DeviceRepository {
   SimulationDeviceRepositoryImpl()
-      : _firestoreSource = DevicesFirestoreSource();
+    : _firestoreSource = DevicesFirestoreSource();
 
   final DevicesFirestoreSource _firestoreSource;
 
@@ -14,16 +12,18 @@ class SimulationDeviceRepositoryImpl implements DeviceRepository {
   Stream<List<DeviceModel>> watchDevicesForRoom(String roomKey) {
     final ids = kRoomDevices[roomKey] ?? [];
     return _firestoreSource.watchSimDevices(ids).map((map) {
-      return ids.map((id) {
-        return DeviceModel(
-          id: id,
-          name: id.replaceAll('_', ' '),
-          type: id.toDeviceType(),
-          roomId: roomKey,
-          simulationData: map[id],
-          source: DeviceSourceType.simulation,
-        );
-      }).toList(growable: false);
+      return ids
+          .map((id) {
+            return DeviceModel(
+              id: id,
+              name: id.replaceAll('_', ' '),
+              type: id.toDeviceType(),
+              roomId: roomKey,
+              simulationData: map[id],
+              source: DeviceSourceType.simulation,
+            );
+          })
+          .toList(growable: false);
     });
   }
 

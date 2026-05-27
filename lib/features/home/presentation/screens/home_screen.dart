@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
+import 'package:get_it/get_it.dart';
 import '../../../../core/core.dart';
-import '../../../../core/l10n/app_localizations.dart';
+import '../../../../features/smart_room/cubit/smart_room_cubit.dart';
 import '../../../weather/cubit/weather_cubit.dart';
-import '../../../weather/cubit/weather_states.dart';
 import '../../../weather/screens/weather_screen.dart';
 import '../../presentation/screens/settings_screen.dart';
 import '../widgets/home_drawer.dart';
+import '../widgets/home_info_row.dart';
 import '../widgets/lighted_background.dart';
 import '../widgets/page_indicators.dart';
 import '../widgets/smart_room_page_view.dart';
@@ -22,10 +22,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final _pageController          = PageController(viewportFraction: 0.8);
+  final _pageController         = PageController(viewportFraction: 0.8);
   final ValueNotifier<double> _pageNotifier         = ValueNotifier(0);
-  final ValueNotifier<int>    _roomSelectorNotifier  = ValueNotifier(-1);
-  final GlobalKey<ScaffoldState> _scaffoldKey        = GlobalKey();
+  final ValueNotifier<int>    _roomSelectorNotifier = ValueNotifier(-1);
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
   @override
   void initState() {
@@ -53,34 +53,34 @@ class _HomeScreenState extends State<HomeScreen> {
     final l10n      = AppLocalizations.of(context);
     final textColor = SHColors.text(context);
 
-    return BlocProvider(
-      create: (_) => WeatherCubit(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => WeatherCubit()),
+        // SmartRoomCubit is shared by PageView + PageIndicators
+        BlocProvider(
+          create: (_) => GetIt.I<SmartRoomCubit>()..loadRooms(),
+        ),
+      ],
       child: LightedBackground(
         child: Scaffold(
           key: _scaffoldKey,
           backgroundColor: Colors.transparent,
           drawer: HomeDrawer(onNavigate: _navigateTo),
           appBar: ShAppBar(
-            onMenuTap: () => _scaffoldKey.currentState?.openDrawer(),
+            onMenuTap:     () => _scaffoldKey.currentState?.openDrawer(),
             onSettingsTap: () => _navigateTo(const SettingsScreen()),
           ),
           body: SafeArea(
             child: Column(
               children: [
                 SizedBox(height: 12.h),
-
-                // ── Weather + Emergency row ────────────────────────────
-                _HomeInfoRow(
-                  onWeatherTap: () => _navigateTo(const WeatherScreen()),
-                ),
-
+                HomeInfoRow(
+                    onWeatherTap: () => _navigateTo(const WeatherScreen())),
                 SizedBox(height: 14.h),
-
-                // ── Section title ──────────────────────────────────────
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24.w),
+                  padding: EdgeInsetsDirectional.symmetric(horizontal: 24.w),
                   child: Align(
-                    alignment: Alignment.centerLeft,
+                    alignment: AlignmentDirectional.centerStart,
                     child: Text(
                       l10n.selectRoom.toUpperCase(),
                       style: TextStyle(
@@ -93,17 +93,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 SizedBox(height: 16.h),
-
-                // ── Room PageView ──────────────────────────────────────
                 Expanded(
                   child: Stack(
                     fit: StackFit.expand,
                     clipBehavior: Clip.none,
                     children: [
                       SmartRoomsPageView(
-                        pageNotifier: _pageNotifier,
+                        pageNotifier:         _pageNotifier,
                         roomSelectorNotifier: _roomSelectorNotifier,
-                        controller: _pageController,
+                        controller:           _pageController,
                       ),
                       Positioned.fill(
                         top: null,
@@ -111,11 +109,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             PageIndicators(
                               roomSelectorNotifier: _roomSelectorNotifier,
-                              pageNotifier: _pageNotifier,
+                              pageNotifier:         _pageNotifier,
                             ),
                             SmHomeBottomNavigationBar(
                               roomSelectorNotifier: _roomSelectorNotifier,
-                              onNavigate: _navigateTo,
+                              onNavigate:           _navigateTo,
                             ),
                           ],
                         ),
@@ -128,93 +126,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-    );
-  }
-}
-
-// ── Info row: Weather + Emergency shutoff ──────────────────────────────────────
-class _HomeInfoRow extends StatelessWidget {
-  const _HomeInfoRow({required this.onWeatherTap});
-  final VoidCallback onWeatherTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = SHColors.primary(context);
-
-    return BlocBuilder<WeatherCubit, WeatherState>(
-      builder: (context, state) {
-        String feelsLikeLabel = AppLocalizations.of(context).weather;
-        if (state is WeatherSuccess && state.forecasts.isNotEmpty) {
-          feelsLikeLabel =
-              '${AppLocalizations.of(context).weather}  ${state.forecasts.first.feelsLike.toInt()}°C';
-        }
-
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w),
-          child: Row(
-            children: [
-              // Weather chip
-              GestureDetector(
-                onTap: onWeatherTap,
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 12.w, vertical: 8.h),
-                  decoration: BoxDecoration(
-                    // ignore: deprecated_member_use
-                    color: Colors.orange.withOpacity(0.10),
-                    borderRadius: BorderRadius.circular(20.r),
-                    border: Border.all(
-                        // ignore: deprecated_member_use
-                        color: Colors.orange.withOpacity(0.35)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.wb_sunny_outlined,
-                          color: Colors.orange, size: 15.sp),
-                      SizedBox(width: 5.w),
-                      Text(
-                        feelsLikeLabel,
-                        style: TextStyle(
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.orange,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const Spacer(),
-
-              // Live dot indicator
-              Container(
-                width: 8.w,
-                height: 8.w,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: primary,
-                  boxShadow: [
-                    BoxShadow(
-                        // ignore: deprecated_member_use
-                        color: primary.withOpacity(0.45), blurRadius: 6),
-                  ],
-                ),
-              ),
-              SizedBox(width: 5.w),
-              Text(
-                'Live',
-                style: TextStyle(
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.w600,
-                  color: SHColors.text(context),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

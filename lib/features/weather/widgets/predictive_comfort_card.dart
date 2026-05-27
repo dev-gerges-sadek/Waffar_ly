@@ -11,13 +11,15 @@ class PredictiveComfortCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark   = Theme.of(context).brightness == Brightness.dark;
-    final primary  = SHColors.primary(context);
-    final warning  = isDark ? SHColors.darkWarningColor : SHColors.lightWarningColor;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = SHColors.primary(context);
+    final warning = isDark
+        ? SHColors.darkWarningColor
+        : SHColors.lightWarningColor;
 
-    final isHot    = weather.isHot;
-    final acColor  = isHot ? warning : primary;
-    final bgColor  = acColor.withOpacity(0.08);
+    final isHot = weather.isHot;
+    final acColor = isHot ? warning : primary;
+    final bgColor = acColor.withOpacity(0.08);
 
     return Container(
       padding: EdgeInsets.all(14.w),
@@ -67,7 +69,10 @@ class PredictiveComfortCard extends StatelessWidget {
           ),
           // Outside temp badge
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+            padding: EdgeInsetsDirectional.symmetric(
+              horizontal: 8.w,
+              vertical: 4.h,
+            ),
             decoration: BoxDecoration(
               color: acColor.withOpacity(0.15),
               borderRadius: BorderRadius.circular(8.r),

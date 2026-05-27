@@ -39,12 +39,12 @@ class RoomCard extends StatelessWidget {
           Transform.scale(
             scale: lerpDouble(.85, 1.2, value),
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 180),
+              padding: const EdgeInsetsDirectional.only(bottom: 180),
               child: BackgroundRoomCard(room: room, translation: value),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(bottom: 200),
+            padding: const EdgeInsetsDirectional.only(bottom: 200),
             child: Transform(
               transform: Matrix4.translationValues(0, -90 * value, 0),
               child: GestureDetector(
@@ -72,7 +72,10 @@ class RoomCard extends StatelessWidget {
                     fit: StackFit.expand,
                     clipBehavior: Clip.none,
                     children: [
-                      ParallaxImageCard(imageUrl: room.imageUrl, parallaxValue: percent),
+                      ParallaxImageCard(
+                        imageUrl: room.imageUrl,
+                        parallaxValue: percent,
+                      ),
                       VerticalRoomTitle(room: room),
                       CameraIconButton(room: room),
                       const AnimatedUpwardArrows(),
@@ -102,7 +105,7 @@ class AnimatedUpwardArrows extends StatelessWidget {
           const ShimmerArrows(),
           const SizedBox(height: 24),
           Container(
-            margin: const EdgeInsets.only(bottom: 12),
+            margin: const EdgeInsetsDirectional.only(bottom: 12),
             height: 4,
             width: 120,
             decoration: BoxDecoration(
@@ -126,7 +129,7 @@ class CameraIconButton extends StatelessWidget {
     return Material(
       type: MaterialType.transparency,
       child: Align(
-        alignment: Alignment.topRight,
+        alignment: AlignmentDirectional.topEnd,
         child: IconButton(
           onPressed: () => Navigator.push(
             context,
@@ -147,15 +150,20 @@ class VerticalRoomTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textColor = SHColors.text(context);
+    final l10n = AppLocalizations.of(context);
     return Align(
-      alignment: Alignment.centerLeft,
+      alignment: AlignmentDirectional.centerStart,
       child: RotatedBox(
         quarterTurns: -1,
         child: FittedBox(
           child: Padding(
-            padding: EdgeInsets.only(left: 40.h, right: 20.h, top: 12.w),
+            padding: EdgeInsetsDirectional.only(
+              start: 40.h,
+              end: 20.h,
+              top: 12.w,
+            ),
             child: Text(
-              room.name.replaceAll(' ', ''),
+              l10n.translateDeviceOrRoomName(room.name).replaceAll(' ', ''),
               maxLines: 1,
               style: TextStyle(
                 fontSize: 42.sp,

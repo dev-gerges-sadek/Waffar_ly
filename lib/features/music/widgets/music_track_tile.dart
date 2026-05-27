@@ -30,7 +30,7 @@ class MusicTrackTile extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        margin: EdgeInsets.only(bottom: 10.h),
+        margin: EdgeInsetsDirectional.only(bottom: 10.h),
         padding: EdgeInsets.all(10.w),
         decoration: BoxDecoration(
           color: isPlaying ? primary.withOpacity(0.10) : cardColor,

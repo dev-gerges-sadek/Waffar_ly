@@ -1,114 +1,99 @@
-import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/constants/app_constants.dart';
+import '../../../core/l10n/app_localizations.dart';
+import '../data/chatbot_repository_impl.dart';
+import '../domain/repositories/chatbot_repository.dart';
 import 'chatbot_states.dart';
 
 class ChatbotCubit extends Cubit<ChatbotState> {
-  ChatbotCubit() : super(ChatbotInitial()) {
-    _init();
-  }
+  ChatbotCubit({
+    required ChatbotRepository repository,
+    required AppLocalizations l10n,
+  })  : _repo = repository,
+        _l10n = l10n,
+        super(const ChatbotInitial());
 
-  final _dio                          = Dio();
-  final List<ChatMessage>             _messages = [];
-  final List<Map<String, String>>     _history  = [];
+  final ChatbotRepository _repo;
+  final AppLocalizations  _l10n;
+  final List<ChatMessage> _messages = [];
 
-  static const _systemPrompt = '''
-You are Waffar, a smart home assistant AI. You help users:
-1. Control and understand their smart home devices (lights, AC, fans, TV, etc.)
-2. Understand their energy consumption data (kWh, watts, volts, amps)
-3. Get weather-based comfort recommendations
-4. Troubleshoot device issues
-5. Explain anomaly alerts
+  // ── Session init ──────────────────────────────────────────────────────────
+  // Called explicitly from the screen after the first build — never in the
+  // constructor to avoid AppLocalizations resolution timing issues.
 
-Tone: Friendly, concise, and helpful. Keep responses short (2–4 sentences max).
-Always respond in the same language the user writes in (Arabic or English).
-Context: The app connects to Firebase Firestore for real-time device data.
-Devices include: Lamp_LR_01, Fan_LR_01, TV_LR_01, AC_BR_01, Lamp_BR_01, etc.
-''';
-
-  void _init() {
-    _messages.clear();
-    _history.clear();
-    _messages.add(ChatMessage(
-      text: 'Hello! I\'m Waffar AI 👋\nAsk me anything about your smart home — devices, energy, weather, or anything else.',
+  void startSession() {
+    if (_messages.isNotEmpty) return;
+    _push(ChatMessage(
+      text: _l10n.chatWelcome,
       isUser: false,
       timestamp: DateTime.now(),
     ));
     emit(ChatbotReady(List.unmodifiable(_messages)));
   }
 
+  // ── Public API ────────────────────────────────────────────────────────────
+
+  /// [text] is the user's raw input.
+  /// [_l10n.isArabic] is forwarded to the repository so the system prompt
+  /// and context block are rendered in the correct language before being
+  /// sent to the model — guaranteeing Arabic-first responses for Arabic users.
   Future<void> sendMessage(String text) async {
-    if (text.trim().isEmpty) return;
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return;
 
-    // Validate API key before calling
-    if (AppConstants.anthropicApiKey == 'YOUR_ANTHROPIC_API_KEY' ||
-        AppConstants.anthropicApiKey.isEmpty) {
-      _addBotMessage(
-        '⚠️ Anthropic API key is not set.\n'
-        'Please add your API key in:\nlib/core/constants/app_constants.dart',
-      );
-      return;
-    }
-
-    _messages.add(ChatMessage(
-      text: text.trim(),
+    _push(ChatMessage(
+      text: trimmed,
       isUser: true,
       timestamp: DateTime.now(),
     ));
-    _history.add({'role': 'user', 'content': text.trim()});
     emit(ChatbotTyping(List.unmodifiable(_messages)));
 
     try {
-      final response = await _dio.post(
-        'https://api.anthropic.com/v1/messages',
-        options: Options(
-          headers: {
-            'Content-Type':      'application/json',
-            'x-api-key':         AppConstants.anthropicApiKey,
-            'anthropic-version': '2023-06-01',
-          },
-          sendTimeout:    const Duration(seconds: 30),
-          receiveTimeout: const Duration(seconds: 30),
-        ),
-        data: {
-          'model':      AppConstants.anthropicModel,
-          'max_tokens': 512,
-          'system':     _systemPrompt,
-          'messages':   List<Map<String, String>>.from(_history),
-        },
+      final reply = await _repo.ask(
+        trimmed,
+        isArabic: _l10n.isArabic,
       );
-
-      final reply = response.data['content'][0]['text'] as String;
-      _history.add({'role': 'assistant', 'content': reply});
-      _addBotMessage(reply);
-    } on DioException catch (e) {
-      final status = e.response?.statusCode;
-      final msg = status == 401
-          ? '🔑 Invalid API key. Check AppConstants.anthropicApiKey.'
-          : status == 429
-              ? '⏳ Rate limit reached. Please wait a moment.'
-              : '📵 Connection error. Check your internet and try again.';
-      _addBotMessage(msg);
-      emit(ChatbotError(List.unmodifiable(_messages), msg));
-    } catch (_) {
-      const msg = 'Something went wrong. Please try again.';
-      _addBotMessage(msg);
-      emit(ChatbotError(List.unmodifiable(_messages), msg));
+      _replyWith(reply);
+    } on ChatbotApiKeyMissingException {
+      _replyWith(_l10n.chatbotApiKeyMissing, isError: true);
+    } on ChatbotApiKeyInvalidException {
+      _replyWith(_l10n.chatbotApiKeyInvalid, isError: true);
+    } on ChatbotRateLimitException {
+      _replyWith(_l10n.chatbotRateLimited, isError: true);
+    } on ChatbotNetworkException {
+      _replyWith(_l10n.chatbotNetworkError, isError: true);
+    } on ChatbotEmptyResponseException {
+      _replyWith(_l10n.chatbotEmptyResponse, isError: true);
+    } on ChatbotApiException catch (e) {
+      // Raw server message stays in logs — never surfaced to the user.
+      debugPrint('[ChatbotCubit] API error detail: ${e.message}');
+      _replyWith(_l10n.chatbotGenericError, isError: true);
+    } catch (e) {
+      debugPrint('[ChatbotCubit] Unexpected error: $e');
+      _replyWith(_l10n.chatbotGenericError, isError: true);
     }
-  }
-
-  void _addBotMessage(String text) {
-    _messages.add(ChatMessage(
-      text: text,
-      isUser: false,
-      timestamp: DateTime.now(),
-    ));
-    emit(ChatbotReady(List.unmodifiable(_messages)));
   }
 
   void clearChat() {
     _messages.clear();
-    _history.clear();
-    _init();
+    _repo.clearSession();
+    startSession();
+  }
+
+  // ── Private helpers ───────────────────────────────────────────────────────
+
+  void _push(ChatMessage msg) => _messages.add(msg);
+
+  void _replyWith(String text, {bool isError = false}) {
+    _push(ChatMessage(
+      text: text,
+      isUser: false,
+      timestamp: DateTime.now(),
+    ));
+    emit(
+      isError
+          ? ChatbotError(List.unmodifiable(_messages), text)
+          : ChatbotReady(List.unmodifiable(_messages)),
+    );
   }
 }

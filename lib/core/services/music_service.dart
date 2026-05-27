@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:async';
 
 import 'package:just_audio/just_audio.dart';
@@ -64,13 +66,8 @@ class MusicService {
       await _player.pause();
       return;
     }
-    if (_player.sequenceState != null) {
-      await _player.play();
-      return;
-    }
-    if (playlist.isNotEmpty) {
-      await playTrack(playlist.first);
-    }
+    await _player.play();
+    return;
   }
 
   Future<void> next() async {

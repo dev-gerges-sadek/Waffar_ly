@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-import '../../../../core/shared/domain/entities/smart_room.dart';
+import '../../../../features/smart_room/cubit/smart_room_cubit.dart';
+import '../../../../features/smart_room/cubit/smart_room_states.dart';
 import '../../../../core/theme/sh_colors.dart';
 
 class PageIndicators extends StatelessWidget {
@@ -11,7 +12,7 @@ class PageIndicators extends StatelessWidget {
     required this.pageNotifier,
   });
 
-  final ValueNotifier<int>    roomSelectorNotifier;
+  final ValueNotifier<int> roomSelectorNotifier;
   final ValueNotifier<double> pageNotifier;
 
   @override
@@ -25,14 +26,16 @@ class PageIndicators extends StatelessWidget {
             : const Duration(milliseconds: 400),
         child: child,
       ),
-      child: ValueListenableBuilder<double>(
-        valueListenable: pageNotifier,
-        builder: (_, value, _) => Center(
-          child: PageViewIndicators(
-            length: SmartRoom.fakeValues.length,
-            pageIndex: value,
-          ),
-        ),
+      child: BlocBuilder<SmartRoomCubit, SmartRoomState>(
+        builder: (_, state) {
+          final count = state is SmartRoomLoaded ? state.rooms.length : 0;
+          return ValueListenableBuilder<double>(
+            valueListenable: pageNotifier,
+            builder: (_, value, _) => Center(
+              child: PageViewIndicators(length: count, pageIndex: value),
+            ),
+          );
+        },
       ),
     );
   }
@@ -45,15 +48,14 @@ class PageViewIndicators extends StatelessWidget {
     super.key,
   });
 
-  final int    length;
+  final int length;
   final double pageIndex;
 
   @override
   Widget build(BuildContext context) {
-    // ✅ theme-aware colors
     final primaryColor = SHColors.primary(context);
-    final bgColor      = SHColors.background(context);
-    final trackColor   = SHColors.track(context);
+    final bgColor = SHColors.background(context);
+    final trackColor = SHColors.track(context);
 
     return SizedBox(
       height: 12.h,
@@ -72,10 +74,7 @@ class PageViewIndicators extends StatelessWidget {
           ),
           Positioned(
             left: (16.w * pageIndex) + (6.w * pageIndex),
-            child: _BorderDot(
-              primaryColor: primaryColor,
-              bgColor: bgColor,
-            ),
+            child: _BorderDot(primaryColor: primaryColor, bgColor: bgColor),
           ),
         ],
       ),
@@ -84,28 +83,21 @@ class PageViewIndicators extends StatelessWidget {
 }
 
 class _BorderDot extends StatelessWidget {
-  const _BorderDot({
-    required this.primaryColor,
-    required this.bgColor,
-  });
-
-  final Color primaryColor;
-  final Color bgColor;
+  const _BorderDot({required this.primaryColor, required this.bgColor});
+  final Color primaryColor, bgColor;
 
   @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 12.w,
-      height: 12.h,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          border: Border.all(color: primaryColor, width: 2), // ✅
-          color: bgColor,                                     // ✅
-          shape: BoxShape.circle,
-        ),
+  Widget build(BuildContext context) => SizedBox(
+    width: 12.w,
+    height: 12.h,
+    child: DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border.all(color: primaryColor, width: 2),
+        color: bgColor,
+        shape: BoxShape.circle,
       ),
-    );
-  }
+    ),
+  );
 }
 
 class _Dot extends StatelessWidget {
@@ -113,16 +105,11 @@ class _Dot extends StatelessWidget {
   final Color trackColor;
 
   @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 6.w,
-      height: 6.h,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: trackColor, // ✅
-          shape: BoxShape.circle,
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => SizedBox(
+    width: 6.w,
+    height: 6.h,
+    child: DecoratedBox(
+      decoration: BoxDecoration(color: trackColor, shape: BoxShape.circle),
+    ),
+  );
 }

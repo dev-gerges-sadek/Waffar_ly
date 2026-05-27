@@ -1,14 +1,14 @@
-// ignore_for_file: deprecated_member_use, use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, deprecated_member_use
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:waffar_ly_app/core/constants/app_constants.dart';
-import 'package:waffar_ly_app/core/theme/sh_colors.dart';
-import 'package:waffar_ly_app/features/auth/signin/signin_screen.dart';
-import 'package:waffar_ly_app/features/home/presentation/screens/home_screen.dart';
-import 'package:waffar_ly_app/features/home/presentation/screens/onboarding_screen.dart';
-
+import '../../../../core/constants/app_constants.dart';
+import '../../../../core/l10n/app_localizations.dart';
+import '../../../../core/router/router.dart';
+import '../../../../core/theme/sh_colors.dart';
+import 'onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -19,54 +19,38 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
-  late AnimationController _scaleCtrl;
-  late AnimationController _fadeCtrl;
+  late final AnimationController _scaleCtrl;
+  late final AnimationController _fadeCtrl;
 
   @override
   void initState() {
     super.initState();
     _scaleCtrl = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    )..forward();
-
+        duration: const Duration(milliseconds: 1500), vsync: this)
+      ..forward();
     _fadeCtrl = AnimationController(
-      duration: const Duration(milliseconds: 2000),
-      vsync: this,
-    )..forward();
+        duration: const Duration(milliseconds: 2000), vsync: this)
+      ..forward();
 
     Future.delayed(const Duration(seconds: 3), _navigate);
   }
 
-  /// Auth guard + onboarding seen check
   Future<void> _navigate() async {
     if (!mounted) return;
-
     final user  = FirebaseAuth.instance.currentUser;
     final prefs = await SharedPreferences.getInstance();
     final seen  = prefs.getBool(AppConstants.keySeenOnboarding) ?? false;
-
     if (!mounted) return;
-
     if (user != null) {
-      // Already logged in → go Home directly
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
+      Navigator.pushReplacementNamed(context, AppRouter.home);
     } else if (!seen) {
-      // First time → Onboarding
       await prefs.setBool(AppConstants.keySeenOnboarding, true);
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const OnboardingScreen()),
       );
     } else {
-      // Seen onboarding but not logged in → SignIn
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const SignInScreen()),
-      );
+      Navigator.pushReplacementNamed(context, AppRouter.signin);
     }
   }
 
@@ -79,7 +63,11 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n      = AppLocalizations.of(context);
+    final isDark    = Theme.of(context).brightness == Brightness.dark;
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    final cardBg    = isDark ? SHColors.darkCardColor : SHColors.lightCardColor;
+
     final gradientColors = isDark
         ? [
             SHColors.darkPrimaryColor.withOpacity(0.8),
@@ -96,8 +84,8 @@ class _SplashScreenState extends State<SplashScreen>
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            begin: AlignmentDirectional.topStart,
+            end: AlignmentDirectional.bottomEnd,
             colors: gradientColors,
           ),
         ),
@@ -118,11 +106,11 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Container(
                     padding: EdgeInsets.all(20.w),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.95),
+                      color: cardBg.withOpacity(0.95),
                       borderRadius: BorderRadius.circular(30.r),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: SHColors.text(context).withOpacity(0.15),
                           blurRadius: 30,
                           offset: const Offset(0, 10),
                         ),
@@ -138,24 +126,23 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
               ),
               SizedBox(height: 40.h),
-              const SizedBox(
+              SizedBox(
                 width: 36,
                 height: 36,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.5,
-                  valueColor:
-                      AlwaysStoppedAnimation<Color>(Colors.white),
+                  valueColor: AlwaysStoppedAnimation<Color>(onPrimary),
                 ),
               ),
               SizedBox(height: 24.h),
               FadeTransition(
                 opacity: _fadeCtrl,
                 child: Text(
-                  'Waffar',
+                  l10n.appName,
                   style: TextStyle(
                     fontSize: 28.sp,
                     fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    color: onPrimary,
                     letterSpacing: 1.5,
                   ),
                 ),
@@ -164,10 +151,10 @@ class _SplashScreenState extends State<SplashScreen>
               FadeTransition(
                 opacity: _fadeCtrl,
                 child: Text(
-                  'Smart Home Control',
+                  l10n.smartAssist,
                   style: TextStyle(
                     fontSize: 14.sp,
-                    color: Colors.white.withOpacity(0.85),
+                    color: onPrimary.withOpacity(0.85),
                     letterSpacing: 0.5,
                   ),
                 ),

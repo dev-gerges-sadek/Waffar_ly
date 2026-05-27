@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/shared/domain/entities/smart_room.dart';
 import '../../../../core/shared/presentation/widgets/room_card.dart';
+import '../../../../core/theme/sh_colors.dart';
+import '../../../../features/smart_room/cubit/smart_room_cubit.dart';
+import '../../../../features/smart_room/cubit/smart_room_states.dart';
 import '../../../smart_room/screens/room_details_screen.dart';
 
 class SmartRoomsPageView extends StatelessWidget {
@@ -25,51 +28,72 @@ class SmartRoomsPageView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<double>(
-      valueListenable: pageNotifier,
-      builder: (_, page, _) => ValueListenableBuilder(
-        valueListenable: roomSelectorNotifier,
-        builder: (_, selected, _) => PageView.builder(
-          clipBehavior: Clip.none,
-          itemCount: SmartRoom.fakeValues.length,
-          controller: controller,
-          itemBuilder: (_, index) {
-            final percent = page - index;
-            final isSelected = selected == index;
-            final room = SmartRoom.fakeValues[index];
-            return AnimatedContainer(
-              duration: kThemeAnimationDuration,
-              curve: Curves.fastOutSlowIn,
-              transform: _getOutTranslate(percent, selected, index),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: RoomCard(
-                percent: percent,
-                expand: isSelected,
-                room: room,
-                onSwipeUp: () => roomSelectorNotifier.value = index,
-                onSwipeDown: () => roomSelectorNotifier.value = -1,
-                onTap: () async {
-                  if (isSelected) {
-                    await Navigator.push(
-                      context,
-                      PageRouteBuilder<void>(
-                        transitionDuration: const Duration(milliseconds: 800),
-                        reverseTransitionDuration:
-                            const Duration(milliseconds: 800),
-                        pageBuilder: (_, animation, _) => FadeTransition(
-                          opacity: animation,
-                          child: RoomDetailScreen(room: room),
+    final primary = SHColors.primary(context);
+
+    return BlocBuilder<SmartRoomCubit, SmartRoomState>(
+      builder: (_, state) {
+        if (state is SmartRoomLoading || state is SmartRoomInitial) {
+          return Center(child: CircularProgressIndicator(color: primary));
+        }
+        if (state is SmartRoomError) {
+          return Center(
+            child: Text(
+              state.message,
+              style: TextStyle(color: SHColors.hint(context)),
+            ),
+          );
+        }
+
+        final rooms = state is SmartRoomLoaded ? state.rooms : <SmartRoom>[];
+
+        return ValueListenableBuilder<double>(
+          valueListenable: pageNotifier,
+          builder: (_, page, _) => ValueListenableBuilder<int>(
+            valueListenable: roomSelectorNotifier,
+            builder: (_, selected, _) => PageView.builder(
+              clipBehavior: Clip.none,
+              itemCount: rooms.length,
+              controller: controller,
+              itemBuilder: (_, index) {
+                final percent = page - index;
+                final isSelected = selected == index;
+                final room = rooms[index];
+
+                return AnimatedContainer(
+                  duration: kThemeAnimationDuration,
+                  curve: Curves.fastOutSlowIn,
+                  transform: _getOutTranslate(percent, selected, index),
+                  padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
+                  child: RoomCard(
+                    percent: percent,
+                    expand: isSelected,
+                    room: room,
+                    onSwipeUp: () => roomSelectorNotifier.value = index,
+                    onSwipeDown: () => roomSelectorNotifier.value = -1,
+                    onTap: () async {
+                      if (!isSelected) return;
+                      await Navigator.push(
+                        context,
+                        PageRouteBuilder<void>(
+                          transitionDuration: const Duration(milliseconds: 800),
+                          reverseTransitionDuration: const Duration(
+                            milliseconds: 800,
+                          ),
+                          pageBuilder: (_, animation, _) => FadeTransition(
+                            opacity: animation,
+                            child: RoomDetailScreen(room: room),
+                          ),
                         ),
-                      ),
-                    );
-                    roomSelectorNotifier.value = -1;
-                  }
-                },
-              ),
-            );
-          },
-        ),
-      ),
+                      );
+                      roomSelectorNotifier.value = -1;
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 }

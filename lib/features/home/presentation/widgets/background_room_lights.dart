@@ -26,7 +26,7 @@ class BackgroundRoomCard extends StatelessWidget {
           color: cardColor,
           borderRadius: const BorderRadius.all(Radius.circular(12)),
           boxShadow: const [
-            BoxShadow(color: Colors.black26, blurRadius: 12, offset: Offset(-7, 7)),
+            BoxShadow(color: SHColors.lightShadowColor, blurRadius: 12, offset: Offset(-7, 7)),
           ],
         ),
         child: Column(
@@ -107,7 +107,7 @@ class _DeviceIconSwitcher extends StatelessWidget {
       onTap: () => onTap(!value),
       borderRadius: BorderRadius.circular(8.r),
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
+        padding: EdgeInsetsDirectional.symmetric(horizontal: 4.w, vertical: 4.h),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -157,7 +157,7 @@ class _RoomInfoRow extends StatelessWidget {
     final hintColor = SHColors.hint(context);
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      padding: EdgeInsetsDirectional.symmetric(horizontal: 16.w),
       child: Row(
         children: [
           IconTheme(

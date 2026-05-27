@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:waffar_ly_app/core/app/app_routes.dart';
-import 'package:waffar_ly_app/core/helper/extensions/media_query.dart';
+import '../../../../core/app/app_routes.dart';
+import '../../../../core/helper/extensions/media_query.dart';
+import '../../../../core/l10n/app_localizations.dart';
+import '../../../../core/theme/sh_colors.dart';
 import '../cubit/cubit.dart';
 import '../cubit/states.dart';
 import '../widgets/custom_category_button.dart';
@@ -17,78 +19,60 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-  late TextEditingController emailController;
-  late TextEditingController passwordController;
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
-  @override
-  void initState() {
-    emailController    = TextEditingController();
-    passwordController = TextEditingController();
-    super.initState();
-  }
+  final _emailCtrl    = TextEditingController();
+  final _passwordCtrl = TextEditingController();
+  final _formKey      = GlobalKey<FormState>();
 
   @override
   void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
+    _emailCtrl.dispose();
+    _passwordCtrl.dispose();
     super.dispose();
+  }
+
+  void _submit(BuildContext ctx) {
+    if (_formKey.currentState?.validate() ?? false) {
+      ctx.read<AuthCubit>().login(_emailCtrl.text, _passwordCtrl.text);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // ✅ بدل primaryBlue — بيستخدم لون الـ scaffold من الـ theme
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(
-            horizontal: context.w(24),
-            vertical: context.h(24),
-          ),
-          child: BlocConsumer<AuthCubit, AuthStates>(
-            listener: (context, state) {
-              if (state is LoginSuccessState) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Welcome Back!'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  AppRoutes.home,
-                  (route) => false,
-                );
-              } else if (state is ResetPasswordSuccessState) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Check your email to reset password'),
-                    backgroundColor: Colors.blue,
-                  ),
-                );
-              } else if (state is LoginErrorState) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.error),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              } else if (state is ResetPasswordErrorState) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.error),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            builder: (context, state) {
-              return Form(
-                key: formKey,
+    final l10n = AppLocalizations.of(context);
+
+    return BlocProvider(
+      create: (_) => AuthCubit.withL10n(l10n),
+      child: Scaffold(
+        backgroundColor: SHColors.background(context),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsetsDirectional.symmetric(
+              horizontal: context.w(24),
+              vertical: context.h(24),
+            ),
+            child: BlocConsumer<AuthCubit, AuthStates>(
+              listener: (ctx, state) {
+                if (state is LoginSuccessState) {
+                  _showSnack(ctx, '${l10n.welcomeTo}${l10n.appName}',
+                      SHColors.lightSuccessColor);
+                  Navigator.pushNamedAndRemoveUntil(
+                      ctx, AppRoutes.home, (_) => false);
+                } else if (state is ResetPasswordSuccessState) {
+                  _showSnack(ctx, l10n.forgotPass, SHColors.primary(ctx));
+                } else if (state is LoginErrorState) {
+                  _showSnack(ctx, state.error,
+                      SHColors.darkErrorColor);
+                } else if (state is ResetPasswordErrorState) {
+                  _showSnack(ctx, state.error,
+                      SHColors.darkErrorColor);
+                }
+              },
+              builder: (ctx, state) => Form(
+                key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // ── Logo ──────────────────────────────────────────
                     Center(
                       child: CircleAvatar(
                         radius: context.w(40),
@@ -101,53 +85,47 @@ class _SignInScreenState extends State<SignInScreen> {
                       ),
                     ),
                     SizedBox(height: context.h(24)),
-                    // ✅ TitleHeader بيعرض اسم التطبيق الصح
-                    const TitleHeaderWidget(text: 'Have another productive day!'),
-                    SizedBox(height: context.h(32)),
-                    Text(
-                      'Email',
-                      style: TextStyle(
-                        fontSize: context.sp(14),
-                        color: Theme.of(context).colorScheme.onSurface, // ✅
-                      ),
+
+                    TitleHeaderWidget(
+                      title: l10n.appName,
+                      subtitle: l10n.welcomeTo + l10n.appName,
                     ),
+                    SizedBox(height: context.h(32)),
+
+                    // ── Email ─────────────────────────────────────────
+                    _FieldLabel(l10n.email),
                     SizedBox(height: context.h(8)),
                     CustomFormTextField(
-                      controller: emailController,
+                      controller: _emailCtrl,
                       hintText: 'example@gmail.com',
-                      icon: Icons.email,
-                      validator: (value) => (value == null || value.isEmpty)
-                          ? 'Email is required'
-                          : null,
+                      icon: Icons.email_outlined,
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (v) => (v == null || v.isEmpty)
+                          ? l10n.errInvalidEmail : null,
                     ),
                     SizedBox(height: context.h(16)),
-                    Text(
-                      'Password',
-                      style: TextStyle(
-                        fontSize: context.sp(14),
-                        color: Theme.of(context).colorScheme.onSurface, // ✅
-                      ),
-                    ),
+
+                    // ── Password ──────────────────────────────────────
+                    _FieldLabel(l10n.password),
                     SizedBox(height: context.h(8)),
                     CustomFormTextField(
-                      controller: passwordController,
+                      controller: _passwordCtrl,
                       hintText: '••••••••',
-                      icon: Icons.lock,
+                      icon: Icons.lock_outline,
                       obscureText: true,
-                      validator: (value) => (value == null || value.length < 8)
-                          ? '8+ characters required'
-                          : null,
+                      validator: (v) => (v == null || v.length < 6)
+                          ? l10n.errWeakPassword : null,
                     ),
+
+                    // ── Forgot password ───────────────────────────────
                     Align(
-                      alignment: Alignment.centerRight,
+                      alignment: AlignmentDirectional.centerEnd,
                       child: TextButton(
-                        onPressed: () {
-                          context
-                              .read<AuthCubit>()
-                              .resetPassword(emailController.text);
-                        },
+                        onPressed: () => ctx
+                            .read<AuthCubit>()
+                            .resetPassword(_emailCtrl.text),
                         child: Text(
-                          'Forgot password?',
+                          l10n.forgotPass,
                           style: TextStyle(
                             fontSize: context.sp(12),
                             color: Theme.of(context).colorScheme.primary,
@@ -155,58 +133,75 @@ class _SignInScreenState extends State<SignInScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(height: context.h(16)),
+                    SizedBox(height: context.h(8)),
+
+                    // ── Login button ──────────────────────────────────
                     state is LoginLoadingState ||
                             state is ResetPasswordLoadingState
                         ? const Center(child: CircularProgressIndicator())
                         : SizedBox(
                             width: double.infinity,
                             child: CustomCategoryButton(
-                              text: 'Login',
-                              onTap: () {
-                                if (formKey.currentState?.validate() ?? false) {
-                                  context.read<AuthCubit>().login(
-                                        emailController.text,
-                                        passwordController.text,
-                                      );
-                                }
-                              },
+                              text: l10n.login,
+                              onTap: () => _submit(ctx),
                             ),
                           ),
                     SizedBox(height: context.h(24)),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Don't have an account? ",
-                          style: TextStyle(
-                            fontSize: context.sp(14),
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () => Navigator.pushNamed(
-                              context, AppRoutes.signup),
-                          child: Text(
-                            'Sign Up',
-                            style: TextStyle(
-                              fontSize: context.sp(14),
-                              fontWeight: FontWeight.w600,
-                              color: Theme.of(context).colorScheme.primary,
+
+                    // ── Sign-up link ──────────────────────────────────
+                    Center(
+                      child: Wrap(
+                        alignment: WrapAlignment.center,
+                        children: [
+                          Text(l10n.noAccount,
+                              style: TextStyle(
+                                fontSize: context.sp(13),
+                                color: Theme.of(context).colorScheme.onSurface,
+                              )),
+                          GestureDetector(
+                            onTap: () => Navigator.pushNamed(
+                                context, AppRoutes.signup),
+                            child: Text(
+                              l10n.signUp,
+                              style: TextStyle(
+                                fontSize: context.sp(13),
+                                fontWeight: FontWeight.w700,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     SizedBox(height: context.h(32)),
-                    const OrDivider(text: 'in'),
+                    const OrDivider(mode: 'in'),
                   ],
                 ),
-              );
-            },
+              ),
+            ),
           ),
         ),
       ),
     );
   }
+
+  void _showSnack(BuildContext ctx, String msg, Color bg) =>
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(content: Text(msg), backgroundColor: bg),
+      );
+}
+
+class _FieldLabel extends StatelessWidget {
+  const _FieldLabel(this.text);
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Text(
+        text,
+        style: TextStyle(
+          fontSize: context.sp(13),
+          color: Theme.of(context).colorScheme.onSurface,
+          fontWeight: FontWeight.w500,
+        ),
+      );
 }
