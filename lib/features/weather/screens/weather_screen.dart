@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get_it/get_it.dart';
+import '../data/weather_repository.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/theme/sh_colors.dart';
 import '../../../core/widgets/widgets.dart';
@@ -16,7 +18,7 @@ class WeatherScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-        create: (_) => WeatherCubit(),
+        create: (_) => WeatherCubit(GetIt.I<WeatherRepository>()),
         child: const _WeatherView(),
       );
 }
@@ -41,6 +43,7 @@ class _WeatherView extends StatelessWidget {
                 ? SHColors.darkBackgroundColor
                 : SHColors.lightBackgroundColor,
             leading: IconButton(
+        tooltip: MaterialLocalizations.of(context).backButtonTooltip,
               icon: Icon(Icons.arrow_back_ios_new_rounded,
                   color: textColor, size: 20),
               onPressed: () => Navigator.pop(context),

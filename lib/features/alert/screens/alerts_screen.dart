@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:waffar_ly_app/features/alert/cubit/anomaly_states.dart';
 import '../../../core/l10n/app_localizations.dart';
@@ -18,7 +19,7 @@ class AlertsScreen extends StatelessWidget {
     return BlocBuilder<LocaleCubit, Locale>(
       builder: (_, _) {
         return BlocProvider(
-          create: (_) => AnomalyCubit(AnomalyRepository())..startMonitoring(),
+          create: (_) => AnomalyCubit(GetIt.I<AnomalyRepository>())..startMonitoring(),
           child: const _AnomalyView(),
         );
       },
@@ -44,7 +45,7 @@ class _AnomalyView extends StatelessWidget {
             return LoadingView(message: l10n.connectingFirebase);
           }
           if (state is AnomalyError) {
-            return ErrorView(message: state.message);
+            return ErrorView(message: l10n.errGeneric);
           }
           if (state is AnomalyLoaded) {
             if (state.allClear) return const AllClearView();

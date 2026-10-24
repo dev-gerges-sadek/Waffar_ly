@@ -39,7 +39,7 @@ class MessageBubble extends StatelessWidget {
           if (!isUser) ...[
             CircleAvatar(
               radius: 14.r,
-              backgroundColor: primaryColor.withOpacity(0.15),
+              backgroundColor: primaryColor.withValues(alpha: 0.15),
               child: Icon(
                 Icons.smart_toy_rounded,
                 color: primaryColor,
@@ -59,7 +59,7 @@ class MessageBubble extends StatelessWidget {
                 borderRadius: _bubbleRadius(isUser, context),
                 boxShadow: [
                   BoxShadow(
-                    color: SHColors.text(context).withOpacity(0.06),
+                    color: SHColors.text(context).withValues(alpha: 0.06),
                     blurRadius: 6,
                     offset: const Offset(0, 2),
                   ),

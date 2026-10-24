@@ -1,4 +1,3 @@
-// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:waffar_ly_app/features/ai_dashboard/cubit/ai_energy_state.dart';
@@ -80,15 +79,10 @@ class _SystemHealthBannerState extends State<SystemHealthBanner>
     return switch (widget.status) {
       SystemHealthStatus.healthy  => l10n.allClearMessage,
       SystemHealthStatus.caution  =>
-        l10n.isArabic
-            ? 'احتمالية شذوذ $p% • $w ${l10n.watts}'
-            : 'Anomaly prob $p% • $w ${l10n.watts} active',
+        l10n.healthSubCaution('$p', w, l10n.watts),
       SystemHealthStatus.critical =>
-        l10n.isArabic
-            ? 'تحذير! شذوذ حرج مكتشف • $w ${l10n.watts}'
-            : 'Warning! Critical anomaly • $w ${l10n.watts}',
-      SystemHealthStatus.loading  =>
-        l10n.isArabic ? 'جارٍ تحليل البيانات…' : 'Analysing data…',
+        l10n.healthSubCritical(w, l10n.watts),
+      SystemHealthStatus.loading  => l10n.healthAnalysing,
     };
   }
 
@@ -110,20 +104,20 @@ class _SystemHealthBannerState extends State<SystemHealthBanner>
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              color.withOpacity(isDark ? 0.22 : 0.14),
-              color.withOpacity(isDark ? 0.08 : 0.04),
+              color.withValues(alpha: isDark ? 0.22 : 0.14),
+              color.withValues(alpha: isDark ? 0.08 : 0.04),
             ],
             begin: AlignmentDirectional.centerStart,
             end:   AlignmentDirectional.centerEnd,
           ),
           borderRadius: BorderRadius.circular(20.r),
           border: Border.all(
-            color: color.withOpacity(isAlert ? 0.55 : 0.30),
+            color: color.withValues(alpha: isAlert ? 0.55 : 0.30),
             width: isAlert ? 1.5 : 1.0,
           ),
           boxShadow: [
             BoxShadow(
-              color:      color.withOpacity(isDark ? 0.15 : 0.08),
+              color:      color.withValues(alpha: isDark ? 0.15 : 0.08),
               blurRadius: 20,
               offset:     const Offset(0, 6),
             ),
@@ -137,8 +131,8 @@ class _SystemHealthBannerState extends State<SystemHealthBanner>
               height: 46.w,
               decoration: BoxDecoration(
                 shape:  BoxShape.circle,
-                color:  color.withOpacity(0.18),
-                border: Border.all(color: color.withOpacity(0.4)),
+                color:  color.withValues(alpha: 0.18),
+                border: Border.all(color: color.withValues(alpha: 0.4)),
               ),
               alignment: Alignment.center,
               child: Text(
@@ -155,7 +149,7 @@ class _SystemHealthBannerState extends State<SystemHealthBanner>
                 children: [
                   Text(
                     '${l10n.systemStatusLabel}: '
-                    '${widget.status.label(l10n.isArabic)}',
+                    '${widget.status.label(l10n)}',
                     style: TextStyle(
                       fontSize:   14.sp,
                       fontWeight: FontWeight.w800,
@@ -167,7 +161,7 @@ class _SystemHealthBannerState extends State<SystemHealthBanner>
                     _subtitle(l10n),
                     style: TextStyle(
                       fontSize: 10.5.sp,
-                      color:    SHColors.text(context).withOpacity(0.7),
+                      color:    SHColors.text(context).withValues(alpha: 0.7),
                       height:   1.4,
                     ),
                   ),
@@ -232,7 +226,7 @@ class _LiveDotState extends State<_LiveDot>
             height: 8.w,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: widget.color.withOpacity(0.4 + 0.6 * _ctrl.value),
+              color: widget.color.withValues(alpha: 0.4 + 0.6 * _ctrl.value),
             ),
           ),
         ),

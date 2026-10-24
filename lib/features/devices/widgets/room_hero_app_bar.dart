@@ -1,3 +1,4 @@
+import '../../../core/widgets/tap_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/l10n/app_localizations.dart';
@@ -17,8 +18,8 @@ class RoomHeroAppBar extends StatelessWidget {
     final onPrimary = Theme.of(context).colorScheme.onPrimary;
     // Semi-transparent overlay: dark scrim over hero image
     final scrim = isDark
-        ? SHColors.darkShadowColor.withOpacity(0.6)
-        : SHColors.lightShadowColor.withOpacity(0.5);
+        ? SHColors.darkShadowColor.withValues(alpha: 0.6)
+        : SHColors.lightShadowColor.withValues(alpha: 0.5);
 
     return SliverAppBar(
       expandedHeight: 230.h,
@@ -27,7 +28,7 @@ class RoomHeroAppBar extends StatelessWidget {
       backgroundColor: isDark
           ? SHColors.darkBackgroundColor
           : SHColors.lightBackgroundColor,
-      leading: GestureDetector(
+      leading: TapButton(
         onTap: () => Navigator.pop(context),
         child: Container(
           margin: EdgeInsets.all(8.w),
@@ -79,7 +80,7 @@ class RoomHeroAppBar extends StatelessWidget {
               room.imageUrl,
               fit: BoxFit.cover,
               errorBuilder: (_, _, _) => Container(
-                color: primary.withOpacity(0.2),
+                color: primary.withValues(alpha: 0.2),
                 child: Icon(Icons.home, size: 80, color: primary),
               ),
             ),
@@ -91,7 +92,7 @@ class RoomHeroAppBar extends StatelessWidget {
                   end: AlignmentDirectional.bottomCenter,
                   colors: [
                     SHColors.lightShadowColor,
-                    SHColors.darkShadowColor.withOpacity(0.75),
+                    SHColors.darkShadowColor.withValues(alpha: 0.75),
                   ],
                 ),
               ),
@@ -166,7 +167,7 @@ class _HeaderPill extends StatelessWidget {
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 11, color: onPrimary.withOpacity(0.8)),
+        Icon(icon, size: 11, color: onPrimary.withValues(alpha: 0.8)),
         SizedBox(width: 4.w),
         Text(
           label,

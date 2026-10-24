@@ -1,106 +1,66 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/data/home_scope.dart';
 import '../models/device_model.dart';
 
-/// Firestore streams for device + hardware sensor data.
-/// Replaces old DevicesRtdbSource — now Firestore-only.
+/// Single Firestore gateway for device + hardware sensor data.
+///
+/// Reads only the documents it needs (`whereIn` on document id, chunked to
+/// Firestore's limit of 30) instead of streaming the whole collection.
 class FirestoreDevicesDataSource {
-  FirestoreDevicesDataSource() : _db = FirebaseFirestore.instance;
+  FirestoreDevicesDataSource(this._scope);
 
-  final FirebaseFirestore _db;
+  final HomeScope _scope;
+
+  static const int _whereInLimit = 30;
+
+  CollectionReference<Map<String, dynamic>> get _states =>
+      _scope.col(AppConstants.colDeviceStates);
+
+  Query<Map<String, dynamic>> _byIds(List<String> ids) =>
+      _states.where(FieldPath.documentId, whereIn: ids);
+
+  List<String> _clean(List<String> ids) =>
+      ids.take(_whereInLimit).toList(growable: false);
 
   // ── Simulation devices ────────────────────────────────────────────────────
 
-  /// Stream of DeviceData for a single simulation device.
-  Stream<DeviceData?> watchSimDevice(String deviceId) => _db
-      .collection(AppConstants.colDeviceStates)
-      .doc(deviceId)
-      .snapshots()
-      .map((snap) => _parseData(snap));
-
-  /// Stream of all simulation devices matching [deviceIds].
-  Stream<Map<String, DeviceData>> watchSimDevices(List<String> deviceIds) => _db
-      .collection(AppConstants.colDeviceStates)
-      .snapshots()
-      .map((snap) => _parseDeviceMap(snap, deviceIds));
-
-  // ── Hardware devices ──────────────────────────────────────────────────────
-
-  /// Stream of HardwareSensor for a single hardware device.
-  Stream<HardwareSensor?> watchHwSensor(String deviceId) => _db
-      .collection(AppConstants.colDeviceStates)
-      .doc(deviceId)
-      .snapshots()
-      .map((snap) => _parseSensor(snap, deviceId));
-
-  /// Stream of all hardware sensors matching [deviceIds].
-  Stream<Map<String, HardwareSensor>> watchHwSensors(List<String> deviceIds) =>
-      _db
-          .collection(AppConstants.colDeviceStates)
-          .snapshots()
-          .map((snap) => _parseSensorMap(snap, deviceIds));
-
-  // ── Parsers ──────────────────────────────────────────────────────────────
-
-  DeviceData? _parseData(DocumentSnapshot snap) {
-    if (!snap.exists || snap.data() == null) return null;
-    try {
-      return DeviceData.fromMap(Map<String, dynamic>.from(snap.data() as Map));
-    } catch (_) {
-      return null;
-    }
+  Stream<Map<String, DeviceData>> watchSimDevices(List<String> deviceIds) {
+    final ids = _clean(deviceIds);
+    if (ids.isEmpty) return Stream.value(const {});
+    return _byIds(ids).snapshots().map(
+      (snap) => {
+        for (final doc in snap.docs)
+          doc.id: DeviceData.fromFirestore(doc.data()),
+      },
+    );
   }
 
-  HardwareSensor? _parseSensor(DocumentSnapshot snap, String id) {
-    if (!snap.exists || snap.data() == null) return null;
-    try {
-      return HardwareSensor.fromFirestore(
-        id,
-        Map<String, dynamic>.from(snap.data() as Map),
-      );
-    } catch (_) {
-      return null;
-    }
+  Future<void> updateDeviceState(String deviceId, bool isOn) {
+    return _states.doc(deviceId).set({
+      'status': isOn ? 'ON' : 'OFF',
+      'last_updated': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
   }
 
-  Map<String, DeviceData> _parseDeviceMap(
-    QuerySnapshot snap,
-    List<String> filter,
-  ) {
-    try {
-      final result = <String, DeviceData>{};
-      for (final doc in snap.docs) {
-        if (filter.contains(doc.id)) {
-          final data = DeviceData.fromMap(
-            Map<String, dynamic>.from(doc.data() as Map),
-          );
-          result[doc.id] = data;
-        }
-      }
-      return result;
-    } catch (_) {
-      return {};
-    }
+  // ── Hardware sensors ──────────────────────────────────────────────────────
+
+  Stream<Map<String, HardwareSensor>> watchHwSensors(List<String> deviceIds) {
+    final ids = _clean(deviceIds);
+    if (ids.isEmpty) return Stream.value(const {});
+    return _byIds(ids).snapshots().map(
+      (snap) => {
+        for (final doc in snap.docs)
+          doc.id: HardwareSensor.fromFirestore(doc.id, doc.data()),
+      },
+    );
   }
 
-  Map<String, HardwareSensor> _parseSensorMap(
-    QuerySnapshot snap,
-    List<String> filter,
-  ) {
-    try {
-      final result = <String, HardwareSensor>{};
-      for (final doc in snap.docs) {
-        if (filter.contains(doc.id)) {
-          final sensor = HardwareSensor.fromFirestore(
-            doc.id,
-            Map<String, dynamic>.from(doc.data() as Map),
-          );
-          result[doc.id] = sensor;
-        }
-      }
-      return result;
-    } catch (_) {
-      return {};
-    }
+  /// Relay command for the physical device (picked up by the ESP32).
+  Future<void> setHardwareStatus(String deviceId, bool isOn) {
+    return _scope.col(AppConstants.colDeviceControl).doc(deviceId).set({
+      'status': isOn ? 'ON' : 'OFF',
+      'last_updated': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
   }
 }

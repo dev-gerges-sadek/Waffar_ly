@@ -61,7 +61,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBh0tuk3ZzRXLbRSY14R5JdwXHdGqx_5B8',
-    appId: '1:1064395812800:android:fb6d9555cf11441883a225',
+    appId: '1:1064395812800:android:79fdb889a90887d283a225',
     messagingSenderId: '1064395812800',
     projectId: 'smart-home-b6da7',
     storageBucket: 'smart-home-b6da7.firebasestorage.app',

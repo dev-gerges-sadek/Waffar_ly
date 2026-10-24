@@ -43,11 +43,14 @@ class _DeviceDetailSheet extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     return BlocListener<DevicesCubit, DevicesState>(
+      listenWhen: (p, c) =>
+          c is DevicesLoaded &&
+          (p is! DevicesLoaded || p.toggleErrorSeq != c.toggleErrorSeq),
       listener: (context, state) {
-        if (state is DevicesError) {
+        {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.message),
+              content: Text(l10n.errGeneric),
               backgroundColor: errColor,
               duration: const Duration(seconds: 3),
             ),
@@ -140,10 +143,10 @@ class _DeviceDetailSheet extends StatelessWidget {
                               height: 215.h,
                               padding: EdgeInsets.all(12.w),
                               decoration: BoxDecoration(
-                                color: amber.withOpacity(0.02),
+                                color: amber.withValues(alpha: 0.02),
                                 borderRadius: BorderRadius.circular(20.r),
                                 border: Border.all(
-                                  color: amber.withOpacity(0.08),
+                                  color: amber.withValues(alpha: 0.08),
                                   width: 1.2,
                                 ),
                               ),
@@ -159,7 +162,7 @@ class _DeviceDetailSheet extends StatelessWidget {
                                         style: TextStyle(
                                           fontSize: 10.sp,
                                           fontWeight: FontWeight.w800,
-                                          color: amber.withOpacity(0.5),
+                                          color: amber.withValues(alpha: 0.5),
                                           letterSpacing: 0.5,
                                         ),
                                       ),
@@ -172,7 +175,7 @@ class _DeviceDetailSheet extends StatelessWidget {
                                               AlignmentDirectional.centerEnd,
                                           child: Switch.adaptive(
                                             value: false,
-                                            activeColor: amber,
+                                            activeThumbColor: amber,
                                             onChanged: null,
                                           ),
                                         ),
@@ -187,13 +190,13 @@ class _DeviceDetailSheet extends StatelessWidget {
                                         Container(
                                           padding: EdgeInsets.all(10.w),
                                           decoration: BoxDecoration(
-                                            color: amber.withOpacity(0.04),
+                                            color: amber.withValues(alpha: 0.04),
                                             shape: BoxShape.circle,
                                           ),
                                           child: Icon(
                                             Icons.developer_board_rounded,
                                             size: 22.sp,
-                                            color: amber.withOpacity(0.3),
+                                            color: amber.withValues(alpha: 0.3),
                                           ),
                                         ),
                                         SizedBox(height: 10.h),
@@ -202,7 +205,7 @@ class _DeviceDetailSheet extends StatelessWidget {
                                           style: TextStyle(
                                             fontSize: 11.sp,
                                             fontWeight: FontWeight.w700,
-                                            color: textColor.withOpacity(0.5),
+                                            color: textColor.withValues(alpha: 0.5),
                                           ),
                                         ),
                                         SizedBox(height: 2.h),
@@ -211,7 +214,7 @@ class _DeviceDetailSheet extends StatelessWidget {
                                           style: TextStyle(
                                             fontSize: 8.5.sp,
                                             fontWeight: FontWeight.w500,
-                                            color: hintColor.withOpacity(0.4),
+                                            color: hintColor.withValues(alpha: 0.4),
                                           ),
                                         ),
                                       ],
@@ -255,7 +258,7 @@ class _SheetHandle extends StatelessWidget {
       width: 42.w,
       height: 4.h,
       decoration: BoxDecoration(
-        color: hintColor.withOpacity(0.2),
+        color: hintColor.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(2.r),
       ),
     ),
@@ -289,8 +292,8 @@ class _ModernSheetHeader extends StatelessWidget {
           padding: EdgeInsets.all(10.w),
           decoration: BoxDecoration(
             color: isPowerOn
-                ? primary.withOpacity(0.08)
-                : hintColor.withOpacity(0.05),
+                ? primary.withValues(alpha: 0.08)
+                : hintColor.withValues(alpha: 0.05),
             shape: BoxShape.circle,
           ),
           child: SizedBox(
@@ -327,7 +330,7 @@ class _ModernSheetHeader extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 10.5.sp,
                   fontWeight: FontWeight.w500,
-                  color: isPowerOn ? primary : hintColor.withOpacity(0.6),
+                  color: isPowerOn ? primary : hintColor.withValues(alpha: 0.6),
                 ),
               ),
             ],
@@ -342,7 +345,7 @@ class _ModernSheetHeader extends StatelessWidget {
             alignment: AlignmentDirectional.centerEnd,
             child: Switch.adaptive(
               value: isPowerOn,
-              activeColor: primary,
+              activeThumbColor: primary,
               onChanged: onPowerChanged,
             ),
           ),
@@ -369,14 +372,14 @@ class _LastUpdatedRow extends StatelessWidget {
       Icon(
         Icons.history_toggle_off_rounded,
         size: 12.sp,
-        color: hintColor.withOpacity(0.5),
+        color: hintColor.withValues(alpha: 0.5),
       ),
       SizedBox(width: 5.w),
       Text(
         '$label: ${DateFormat('MMM d, HH:mm').format(date)}',
         style: TextStyle(
           fontSize: 10.sp,
-          color: hintColor.withOpacity(0.5),
+          color: hintColor.withValues(alpha: 0.5),
           fontWeight: FontWeight.w500,
         ),
       ),

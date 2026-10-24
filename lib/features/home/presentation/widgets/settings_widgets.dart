@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+import '../../../../core/widgets/tap_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:waffar_ly_app/core/theme/sh_colors.dart';
@@ -41,19 +41,19 @@ class LanguageOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return TapButton(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: EdgeInsetsDirectional.symmetric(horizontal: 12.w, vertical: 10.h),
         decoration: BoxDecoration(
           color: selected
-              ? primaryColor.withOpacity(0.10)
+              ? primaryColor.withValues(alpha: 0.10)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(10.r),
           border: Border.all(
             color: selected
-                ? primaryColor.withOpacity(0.40)
+                ? primaryColor.withValues(alpha: 0.40)
                 : Colors.transparent,
           ),
         ),

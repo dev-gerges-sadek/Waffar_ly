@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+import '../../../core/widgets/tap_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -26,17 +26,17 @@ class MusicTrackTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return TapButton(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         margin: EdgeInsetsDirectional.only(bottom: 10.h),
         padding: EdgeInsets.all(10.w),
         decoration: BoxDecoration(
-          color: isPlaying ? primary.withOpacity(0.10) : cardColor,
+          color: isPlaying ? primary.withValues(alpha: 0.10) : cardColor,
           borderRadius: BorderRadius.circular(14.r),
           border: Border.all(
-            color: isPlaying ? primary.withOpacity(0.40) : Colors.transparent,
+            color: isPlaying ? primary.withValues(alpha: 0.40) : Colors.transparent,
             width: 1.5,
           ),
         ),
@@ -49,19 +49,20 @@ class MusicTrackTile extends StatelessWidget {
                   ? Container(
                       width: 50.w,
                       height: 50.w,
-                      color: primary.withOpacity(0.2),
+                      color: primary.withValues(alpha: 0.2),
                       child:
                           Icon(Icons.music_note, color: primary, size: 24),
                     )
                   : Image.network(
                       track.artworkUrl,
+                      cacheWidth: 160,
                       width: 50.w,
                       height: 50.w,
                       fit: BoxFit.cover,
                       errorBuilder: (_, _, _) => Container(
                         width: 50.w,
                         height: 50.w,
-                        color: primary.withOpacity(0.2),
+                        color: primary.withValues(alpha: 0.2),
                         child: Icon(Icons.music_note, color: primary),
                       ),
                     ),

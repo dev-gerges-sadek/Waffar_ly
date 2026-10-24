@@ -1,3 +1,4 @@
+import '../../../core/widgets/tap_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/app_localizations.dart';
@@ -27,14 +28,14 @@ class DashboardAppBar extends StatelessWidget implements PreferredSizeWidget {
         gradient: LinearGradient(
           colors: isDark
               ? [SHColors.darkBackgroundColor,
-                 SHColors.darkBackgroundColor.withOpacity(0.95)]
+                 SHColors.darkBackgroundColor.withValues(alpha: 0.95)]
               : [SHColors.lightBackgroundColor,
-                 SHColors.lightBackgroundColor.withOpacity(0.97)],
+                 SHColors.lightBackgroundColor.withValues(alpha: 0.97)],
           begin: AlignmentDirectional.topCenter,
           end: AlignmentDirectional.bottomCenter,
         ),
         border: Border(
-          bottom: BorderSide(color: primary.withOpacity(0.10), width: 1),
+          bottom: BorderSide(color: primary.withValues(alpha: 0.10), width: 1),
         ),
       ),
       child: SafeArea(
@@ -82,12 +83,12 @@ class _BackButton extends StatelessWidget {
   final Color primary, textColor;
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
+  Widget build(BuildContext context) => TapButton(
         onTap: () => Navigator.pop(context),
         child: Container(
           padding: EdgeInsets.all(8.w),
           decoration: BoxDecoration(
-            color: primary.withOpacity(0.08),
+            color: primary.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(10.r),
           ),
           child: Icon(
@@ -107,7 +108,7 @@ class _AiChip extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         padding: EdgeInsetsDirectional.symmetric(horizontal: 5.w, vertical: 1.h),
         decoration: BoxDecoration(
-          color: primary.withOpacity(0.12),
+          color: primary.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(4.r),
         ),
         child: Text(
@@ -127,12 +128,12 @@ class _SettingsButton extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
+  Widget build(BuildContext context) => TapButton(
         onTap: onTap,
         child: Container(
           padding: EdgeInsets.all(8.w),
           decoration: BoxDecoration(
-            color: primary.withOpacity(0.08),
+            color: primary.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(10.r),
           ),
           child: Icon(Icons.tune_rounded, color: primary, size: 18.sp),
@@ -176,7 +177,7 @@ class _LiveBadgeState extends State<LiveBadge>
       builder: (_, _) => Container(
         padding: EdgeInsetsDirectional.symmetric(horizontal: 5.w, vertical: 1.5.h),
         decoration: BoxDecoration(
-          color: success.withOpacity(0.15 + 0.10 * _ctrl.value),
+          color: success.withValues(alpha: 0.15 + 0.10 * _ctrl.value),
           borderRadius: BorderRadius.circular(4.r),
         ),
         child: Row(
@@ -187,7 +188,7 @@ class _LiveBadgeState extends State<LiveBadge>
               height: 5.w,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: success.withOpacity(0.6 + 0.4 * _ctrl.value),
+                color: success.withValues(alpha: 0.6 + 0.4 * _ctrl.value),
               ),
             ),
             SizedBox(width: 3.w),

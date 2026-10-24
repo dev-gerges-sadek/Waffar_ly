@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+import '../../../core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -19,21 +19,21 @@ class PredictiveComfortCard extends StatelessWidget {
 
     final isHot = weather.isHot;
     final acColor = isHot ? warning : primary;
-    final bgColor = acColor.withOpacity(0.08);
+    final bgColor = acColor.withValues(alpha: 0.08);
 
     return Container(
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: acColor.withOpacity(0.3)),
+        border: Border.all(color: acColor.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
           Container(
             padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
-              color: acColor.withOpacity(0.15),
+              color: acColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10.r),
             ),
             child: Icon(
@@ -48,7 +48,7 @@ class PredictiveComfortCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Predictive Comfort',
+                  AppLocalizations.of(context).predictiveComfort,
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w700,
@@ -57,10 +57,15 @@ class PredictiveComfortCard extends StatelessWidget {
                 ),
                 SizedBox(height: 3.h),
                 Text(
-                  weather.acRecommendation ?? '',
+                  switch (weather.acRecommendation) {
+                    AcAdvice.veryHot => AppLocalizations.of(context).acAdviceVeryHot,
+                    AcAdvice.warm => AppLocalizations.of(context).acAdviceWarm,
+                    AcAdvice.cold => AppLocalizations.of(context).acAdviceCold,
+                    null => '',
+                  },
                   style: TextStyle(
                     fontSize: 11.sp,
-                    color: SHColors.text(context).withOpacity(0.8),
+                    color: SHColors.text(context).withValues(alpha: 0.8),
                     height: 1.4,
                   ),
                 ),
@@ -74,7 +79,7 @@ class PredictiveComfortCard extends StatelessWidget {
               vertical: 4.h,
             ),
             decoration: BoxDecoration(
-              color: acColor.withOpacity(0.15),
+              color: acColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: Text(

@@ -27,17 +27,31 @@ class HardwareDevice {
   factory HardwareDevice.fromFirestore(String docId, Map<String, dynamic> d) {
     return HardwareDevice(
       id: docId,
-      voltage: (d['voltage'] as num?)?.toDouble() ?? 0,
-      current: (d['current'] as num?)?.toDouble() ?? 0,
-      power: (d['power'] as num?)?.toDouble() ?? 0,
-      source: d['source'] as String? ?? 'ESP32_Hardware',
-      status: d['status'] as String?,
-      kwh: (d['kwh'] as num?)?.toDouble(),
-      amps: (d['amps'] as num?)?.toDouble(),
-      lastUpdated: d['last_updated'] != null
-          ? (d['last_updated'] as dynamic).toDate()
-          : null,
+      voltage: _num(d['voltage']) ?? 0,
+      current: _num(d['current']) ?? 0,
+      power: _num(d['power']) ?? 0,
+      source: d['source'] is String ? d['source'] as String : 'ESP32_Hardware',
+      status: d['status'] is String ? d['status'] as String : null,
+      kwh: _num(d['kwh']),
+      amps: _num(d['amps']),
+      lastUpdated: _date(d['last_updated']),
     );
+  }
+
+  static double? _num(Object? v) {
+    if (v is num) return v.toDouble();
+    if (v is String) return double.tryParse(v);
+    return null;
+  }
+
+  static DateTime? _date(Object? v) {
+    if (v is DateTime) return v;
+    if (v is int) return DateTime.fromMillisecondsSinceEpoch(v);
+    try {
+      return (v as dynamic)?.toDate() as DateTime?;
+    } catch (_) {
+      return null;
+    }
   }
 
   String get displayName => id.replaceAll('_', ' ');

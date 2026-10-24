@@ -1,8 +1,18 @@
-// ignore: dangling_library_doc_comments
-/// Device models — Firestore only. RTDB removed.
-///
-/// Hardware section is view-only (disabled in UI).
-/// Simulation section allows on/off toggle via Firestore device_states.
+// Device models — Firestore only. RTDB removed.
+//
+// Hardware section is view-only (disabled in UI).
+// Simulation section allows on/off toggle via Firestore device_states.
+
+
+// ── Safe Firestore readers (never throw on a wrongly-typed field) ───────────
+
+double? _asDouble(Object? v) {
+  if (v is num) return v.toDouble();
+  if (v is String) return double.tryParse(v);
+  return null;
+}
+
+String? _asString(Object? v) => v is String ? v : v?.toString();
 
 enum DeviceType { lamp, fan, ac, tv, washer, fridge, heater, speaker }
 
@@ -37,11 +47,11 @@ class DeviceData {
   bool get isOn => status == 'ON';
 
   factory DeviceData.fromFirestore(Map<String, dynamic> d) => DeviceData(
-    status: d['status'] as String? ?? 'OFF',
-    watts: (d['watts'] as num?)?.toDouble(),
-    kwh: (d['kwh'] as num?)?.toDouble(),
-    volts: (d['volts'] as num?)?.toDouble(),
-    amps: (d['amps'] as num?)?.toDouble(),
+    status: _asString(d['status']) ?? 'OFF',
+    watts: _asDouble(d['watts']),
+    kwh: _asDouble(d['kwh']),
+    volts: _asDouble(d['volts']),
+    amps: _asDouble(d['amps']),
     lastUpdated: _parseDate(d['last_updated']),
   );
 
@@ -102,7 +112,7 @@ class HardwareSensor {
     final data = DeviceData.fromFirestore(raw);
     final updatedAt = data.lastUpdated ?? DateTime.now();
 
-    final rawStatus = (raw['status'] as String?)?.toLowerCase() ?? '';
+    final rawStatus = _asString(raw['status'])?.toLowerCase() ?? '';
     final SensorStatus sensorStatus;
     if (rawStatus == 'on') {
       sensorStatus = SensorStatus.online;
@@ -201,7 +211,7 @@ const Map<String, String> kRoomSuffix = {
 };
 
 const Map<String, List<String>> kRoomDevices = {
-  'living_room': ['Lamp_LR_01', 'Fan_LR_01', 'TV_LR_01'],
+  'living_room': ['Lamp_LR_01', 'FAN_LR_01', 'TV_LR_01'],
   'bedroom': ['Lamp_BR_01', 'AC_BR_01'],
   'kitchen': ['Lamp_K_01', 'Fridge_K_01'],
   'bathroom': ['Lamp_B_01', 'HEATER_B_01'],

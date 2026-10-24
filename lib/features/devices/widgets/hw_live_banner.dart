@@ -1,4 +1,3 @@
-// ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -20,17 +19,15 @@ class HwLiveBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = l10n.isArabic
-        ? 'يعمل $count ${count > 1 ? 'مستشعرات أجهزة' : 'مستشعر جهاز'} مباشرةً'
-        : '$count hardware sensor${count > 1 ? 's' : ''} streaming live';
+    final text = l10n.hwSensorsLive(count);
 
     return Container(
       margin: EdgeInsetsDirectional.fromSTEB(16.w, 8.h, 16.w, 0),
       padding: EdgeInsetsDirectional.symmetric(horizontal: 14.w, vertical: 8.h),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.10),
+        color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: color.withOpacity(0.30)),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: Row(
         children: [

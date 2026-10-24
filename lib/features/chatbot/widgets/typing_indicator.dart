@@ -17,7 +17,7 @@ class TypingIndicator extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 14.r,
-            backgroundColor: primary.withOpacity(0.15),
+            backgroundColor: primary.withValues(alpha: 0.15),
             child: Icon(Icons.smart_toy_rounded, color: primary, size: 14),
           ),
           SizedBox(width: 6.w),

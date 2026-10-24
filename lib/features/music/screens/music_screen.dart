@@ -65,9 +65,7 @@ class _MusicViewState extends State<_MusicView> {
               onSubmitted: _onSearch,
               style: TextStyle(color: textColor, fontSize: 13.sp),
               decoration: InputDecoration(
-                hintText: l10n.isArabic
-                    ? 'ابحث عن أغاني أو فنانين…'
-                    : 'Search songs, artists…',
+                hintText: l10n.musicSearchHint,
                 hintStyle: TextStyle(color: hintColor, fontSize: 12.sp),
                 prefixIcon:
                     Icon(Icons.search_rounded, color: hintColor),
@@ -75,6 +73,7 @@ class _MusicViewState extends State<_MusicView> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
+                      tooltip: MaterialLocalizations.of(context).searchFieldLabel,
                       icon: Icon(Icons.send_rounded,
                           color: primary, size: 18),
                       onPressed: () => _onSearch(_searchCtrl.text),
@@ -83,6 +82,7 @@ class _MusicViewState extends State<_MusicView> {
                       builder: (_, s) =>
                           s is MusicLoaded && !s.isTopCharts
                               ? IconButton(
+                                  tooltip: l10n.cancel,
                                   icon: Icon(Icons.close_rounded,
                                       color: hintColor, size: 18),
                                   onPressed: () {
@@ -115,8 +115,8 @@ class _MusicViewState extends State<_MusicView> {
             builder: (_, s) {
               if (s is! MusicLoaded) return const SizedBox.shrink();
               final label = s.isTopCharts
-                  ? (l10n.isArabic ? 'الأكثر استماعاً' : 'TOP CHARTS')
-                  : '${l10n.isArabic ? 'نتائج' : 'RESULTS FOR'} "${s.query.toUpperCase()}"';
+                  ? l10n.musicTopCharts
+                  : '${l10n.musicResultsFor} "${s.query.toUpperCase()}"';
               return Padding(
                 padding: EdgeInsetsDirectional.fromSTEB(
                     16.w, 0, 16.w, 6.h),
@@ -144,23 +144,19 @@ class _MusicViewState extends State<_MusicView> {
                 if (state is MusicError) {
                   return ErrorView(
                       icon: Icons.wifi_off_rounded,
-                      message: state.message);
+                      message: AppLocalizations.of(ctx).errGeneric);
                 }
                 if (state is MusicInitial) {
                   return EmptyStateView(
                     icon: Icons.music_note_rounded,
-                    label: l10n.isArabic
-                        ? 'جارٍ تحميل الأغاني…'
-                        : 'Loading top charts…',
+                    label: l10n.musicLoadingCharts,
                   );
                 }
                 if (state is MusicLoaded) {
                   if (state.tracks.isEmpty) {
                     return EmptyStateView(
                       icon: Icons.search_off_rounded,
-                      label: l10n.isArabic
-                          ? 'لا توجد نتائج لـ "${state.query}"'
-                          : 'No tracks found for "${state.query}"',
+                      label: l10n.musicNoResults(state.query),
                     );
                   }
                   return _TrackList(

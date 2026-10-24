@@ -15,9 +15,9 @@ class AlertsInfoBanner extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-        color: warning.withOpacity(0.10),
+        color: warning.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: warning.withOpacity(0.30)),
+        border: Border.all(color: warning.withValues(alpha: 0.30)),
       ),
       child: Row(
         children: [

@@ -1,4 +1,4 @@
-package com.example.waffar_ly_app
+package com.waffarLy.smarthome
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -3,7 +3,6 @@
 // Thin gradient divider used to separate dashboard sections.
 // ============================================================================
 
-// ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -23,7 +22,7 @@ class SectionDivider extends StatelessWidget {
           gradient: LinearGradient(
             colors: [
               Colors.transparent,
-              SHColors.hint(context).withOpacity(0.15),
+              SHColors.hint(context).withValues(alpha: 0.15),
               Colors.transparent,
             ],
           ),

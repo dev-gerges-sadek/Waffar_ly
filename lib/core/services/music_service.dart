@@ -1,4 +1,3 @@
-// ignore_for_file: deprecated_member_use
 
 import 'dart:async';
 
@@ -8,22 +7,23 @@ import 'package:waffar_ly_app/features/music/models/music_track.dart';
 
 class MusicService {
   MusicService() {
-    _player.currentIndexStream.listen((index) {
+    _subs.add(_player.currentIndexStream.listen((index) {
       if (index != null && index >= 0 && index < _playlist.value.length) {
         _currentTrack.add(_playlist.value[index]);
       }
-    });
+    }));
 
-    _player.playerStateStream.listen((state) {
+    _subs.add(_player.playerStateStream.listen((state) {
       if (state.playing && _player.currentIndex != null) {
         final index = _player.currentIndex!;
         if (index >= 0 && index < _playlist.value.length) {
           _currentTrack.add(_playlist.value[index]);
         }
       }
-    });
+    }));
   }
 
+  final List<StreamSubscription<dynamic>> _subs = [];
   final AudioPlayer _player = AudioPlayer();
   final BehaviorSubject<List<MusicTrack>> _playlist =
       BehaviorSubject<List<MusicTrack>>.seeded([]);
@@ -40,16 +40,15 @@ class MusicService {
   List<MusicTrack> get playlist => _playlist.value;
 
   Future<void> initPlaylist(List<MusicTrack> tracks) async {
-    final sources = tracks
+    // Only play plain https previews - external data is never trusted.
+    final playable = tracks.where(_isSafeUrl).toList(growable: false);
+    final sources = playable
         .map((track) => AudioSource.uri(Uri.parse(track.previewUrl)))
         .toList();
 
-    _playlist.add(List.unmodifiable(tracks));
+    _playlist.add(List.unmodifiable(playable));
     if (sources.isNotEmpty) {
-      await _player.setAudioSource(
-        ConcatenatingAudioSource(children: sources),
-        preload: true,
-      );
+      await _player.setAudioSources(sources, preload: true);
     }
   }
 
@@ -89,7 +88,16 @@ class MusicService {
     _currentTrack.add(null);
   }
 
+  static bool _isSafeUrl(MusicTrack t) {
+    final uri = Uri.tryParse(t.previewUrl);
+    return uri != null && uri.scheme == 'https' && uri.host.isNotEmpty;
+  }
+
   Future<void> dispose() async {
+    for (final s in _subs) {
+      await s.cancel();
+    }
+    _subs.clear();
     await _player.dispose();
     await _playlist.close();
     await _currentTrack.close();

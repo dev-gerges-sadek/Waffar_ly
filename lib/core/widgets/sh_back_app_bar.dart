@@ -1,4 +1,3 @@
-// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../theme/sh_colors.dart';
@@ -23,6 +22,7 @@ class ShBackAppBar extends StatelessWidget implements PreferredSizeWidget {
           : SHColors.lightBackgroundColor,
       elevation: 0,
       leading: IconButton(
+        tooltip: MaterialLocalizations.of(context).backButtonTooltip,
         icon: Icon(
           isRtl
               ? Icons.arrow_forward_ios_rounded

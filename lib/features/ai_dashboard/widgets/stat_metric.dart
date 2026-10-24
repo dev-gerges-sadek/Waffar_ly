@@ -4,7 +4,6 @@
 // Also contains RateFooterCard used at the bottom of the dashboard.
 // ============================================================================
 
-// ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -33,9 +32,9 @@ class StatMetric extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.10),
+        color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: color.withOpacity(0.20)),
+        border: Border.all(color: color.withValues(alpha: 0.20)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,7 +97,7 @@ class RateFooterCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: SHColors.card(context),
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: primary.withOpacity(0.18)),
+        border: Border.all(color: primary.withValues(alpha: 0.18)),
       ),
       child: Row(
         children: [

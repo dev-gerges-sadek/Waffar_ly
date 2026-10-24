@@ -4,7 +4,6 @@
 // Shows: total kWh, estimated cost, device count, live watts.
 // ============================================================================
 
-// ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -117,12 +116,12 @@ class _MonthlyForecastBanner extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            amber.withOpacity(isDark ? 0.12 : 0.08),
-            primary.withOpacity(isDark ? 0.08 : 0.05),
+            amber.withValues(alpha: isDark ? 0.12 : 0.08),
+            primary.withValues(alpha: isDark ? 0.08 : 0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: amber.withOpacity(0.25)),
+        border: Border.all(color: amber.withValues(alpha: 0.25)),
       ),
       child: Row(
         children: [
@@ -153,7 +152,7 @@ class _MonthlyForecastBanner extends StatelessWidget {
           Container(
             padding: EdgeInsetsDirectional.symmetric(horizontal: 8.w, vertical: 4.h),
             decoration: BoxDecoration(
-              color: primary.withOpacity(0.10),
+              color: primary.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: Text(

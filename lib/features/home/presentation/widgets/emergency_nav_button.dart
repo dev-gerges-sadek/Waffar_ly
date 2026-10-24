@@ -1,8 +1,10 @@
-// ignore_for_file: deprecated_member_use
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get_it/get_it.dart';
+import '../../../emergency/data/emergency_repository.dart';
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/theme/sh_colors.dart';
 import '../../../emergency/cubit/emergency_cubit.dart';
@@ -16,28 +18,36 @@ class EmergencyNavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return BlocProvider(
-      create: (_) => EmergencyCubit(),
+      create: (_) => EmergencyCubit(GetIt.I<EmergencyRepository>()),
       child: BlocListener<EmergencyCubit, EmergencyState>(
         listener: (ctx, state) {
           if (state is EmergencyDone) {
             ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
-              content: Text(state.turnedOffCount > 0
-                  ? '✓ ${state.turnedOffCount} devices turned OFF'
-                  : 'All devices were already OFF'),
-              backgroundColor: SHColors.severity(context, 'normal'),
-              duration: const Duration(seconds: 2),
+              content: Text(!state.hardwareSent
+                  ? l10n.emergencyHardwareFailed
+                  : state.turnedOffCount > 0
+                      ? '✓ ${l10n.devicesTurnedOff(state.turnedOffCount)}'
+                      : l10n.allAlreadyOff),
+              backgroundColor: state.hardwareSent
+                  ? SHColors.severity(context, 'normal')
+                  : SHColors.error(context),
+              duration: Duration(seconds: state.hardwareSent ? 2 : 6),
             ));
           } else if (state is EmergencyError) {
             ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
-              content: Text(state.message),
+              content: Text(l10n.emergencyFailed),
               backgroundColor: SHColors.error(context),
               duration: const Duration(seconds: 3),
             ));
           }
         },
         child: Builder(
-          builder: (ctx) => GestureDetector(
+          builder: (ctx) => Semantics(
+            button: true,
+            label: l10n.emergencyShutoff,
+            child: GestureDetector(
             onTap: () => _confirmShutoff(ctx),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
@@ -48,7 +58,7 @@ class EmergencyNavButton extends StatelessWidget {
                 color: SHColors.error(context),
                 boxShadow: [
                   BoxShadow(
-                    color: SHColors.error(context).withOpacity(0.40),
+                    color: SHColors.error(context).withValues(alpha: 0.40),
                     blurRadius: 14,
                     offset: const Offset(0, 4),
                   ),
@@ -60,13 +70,14 @@ class EmergencyNavButton extends StatelessWidget {
               ),
             ),
           ),
+          ),
         ),
       ),
     );
   }
 
   Future<void> _confirmShutoff(BuildContext context) async {
-    HapticFeedback.heavyImpact();
+    unawaited(HapticFeedback.heavyImpact());
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -74,7 +85,7 @@ class EmergencyNavButton extends StatelessWidget {
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.r)),
         title: Text(AppLocalizations.of(context).emergencyShutoff,
-            style: TextStyle(fontWeight: FontWeight.w700)),
+            style: const TextStyle(fontWeight: FontWeight.w700)),
         content: Text(
             AppLocalizations.of(context).shutoffConfirmMessage),
         actions: [
@@ -103,7 +114,7 @@ class EmergencyNavButton extends StatelessWidget {
         backgroundColor: SHColors.warning(context),
         duration: const Duration(seconds: 2),
       ));
-      context.read<EmergencyCubit>().shutoffAll();
+      unawaited(context.read<EmergencyCubit>().shutoffAll());
     }
   }
 }
@@ -136,7 +147,7 @@ class NavItem extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: EdgeInsetsDirectional.symmetric(horizontal: 18.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: isSelected ? primary.withOpacity(0.12) : Colors.transparent,
+          color: isSelected ? primary.withValues(alpha: 0.12) : Colors.transparent,
           borderRadius: BorderRadius.circular(16.r),
         ),
         child: Column(

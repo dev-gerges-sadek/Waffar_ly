@@ -212,3 +212,67 @@ Built with ❤️ using **Flutter** · **Firebase** · **Claude AI**
 **Waffar Smart Home · v1.0.0 · Production Ready**
 
 </div>
+
+---
+
+## Security & configuration
+
+**Secrets are never committed.** API keys are injected at build time:
+
+```bash
+cp env.example.json env.json        # env.json is git-ignored; fill in real keys
+flutter run  --dart-define-from-file=env.json
+flutter build apk --release --obfuscate --split-debug-info=build/symbols \
+  --dart-define-from-file=env.json
+```
+
+> Anything compiled into a mobile app can be extracted. For production, proxy
+> Groq / WeatherAPI through a backend (e.g. a Cloud Function that checks the
+> Firebase ID token and applies rate limits).
+
+**Release signing:** copy `android/key.properties.example` to
+`android/key.properties` and point it at your upload keystore (both git-ignored).
+
+**Firestore rules:** `firestore.rules` is the source of truth —
+`firebase deploy --only firestore:rules`. Test with the Firebase Emulator first.
+
+## Data model (multi-tenant)
+
+All household data lives under `homes/{homeId}/…` (`homeId` = owner uid):
+`device_states`, `Control`, `Devices`, `ai_results`, `device_history`,
+`device_alerts`, `energy_daily`. The app creates `homes/{uid}` on first
+sign-in. The ESP32 gateway and the AI service must write to the same paths
+with the Admin SDK (clients are read-only on telemetry).
+
+Migrate existing global collections once:
+
+```bash
+cd tools && npm i firebase-admin
+GOOGLE_APPLICATION_CREDENTIALS=serviceAccount.json node migrate_to_homes.js <ownerUid> --dry-run
+```
+
+## Backend proxy (Groq + WeatherAPI)
+
+```bash
+cd functions && npm i
+firebase functions:secrets:set GROQ_API_KEY
+firebase functions:secrets:set WEATHER_API_KEY
+firebase deploy --only functions,firestore:rules
+flutter run --dart-define=USE_BACKEND_PROXY=true
+```
+
+With `USE_BACKEND_PROXY=true` no third-party key is compiled into the app.
+
+## Localisation
+
+Strings live in `lib/l10n/app_en.arb` / `app_ar.arb` (generated with
+`flutter gen-l10n`). `test/l10n` fails the build if a key is missing in either
+language or an Arabic value has no Arabic text. Arabic plurals use full ICU
+rules (`=1`, `=2`, `few`, `many`, `other`).
+
+## Android package id
+
+The Android `applicationId` is `com.waffar.smarthome`. After changing it you
+must register that package in Firebase (Console → Project settings → Add app →
+Android, with the debug/release **SHA-1** for Google Sign-In), then run
+`flutterfire configure` to refresh `lib/firebase_options.dart`.

@@ -4,6 +4,8 @@
 // Read from Firestore: device_states/{deviceId}
 // ============================================================================
 
+import '../../../core/helper/safe_json.dart';
+
 class EnergyRecord {
   const EnergyRecord({
     required this.deviceId,
@@ -31,10 +33,10 @@ class EnergyRecord {
   ) =>
       EnergyRecord(
         deviceId: deviceId,
-        watts: (data['watts'] as num?)?.toDouble() ?? 0.0,
-        kwh: (data['kwh'] as num?)?.toDouble() ?? 0.0,
-        aiStatus: (data['ai_status'] as String?) ?? '',
-        recommendation: (data['recommendation'] as String?) ?? '',
+        watts: asDouble(data['watts']) ?? 0.0,
+        kwh: asDouble(data['kwh']) ?? 0.0,
+        aiStatus: asString(data['ai_status']) ?? '',
+        recommendation: asString(data['recommendation']) ?? '',
       );
 }
 

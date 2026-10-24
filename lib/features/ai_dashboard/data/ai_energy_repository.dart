@@ -5,13 +5,14 @@
 // ============================================================================
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../core/data/home_scope.dart';
 import '../../../core/constants/app_constants.dart';
 import '../models/energy_record.dart';
 
 class AiEnergyRepository {
-  AiEnergyRepository() : _db = FirebaseFirestore.instance;
+  AiEnergyRepository(this._scope);
 
-  final FirebaseFirestore _db;
+  final HomeScope _scope;
 
   // ── AI result streams ─────────────────────────────────────────────────────
 
@@ -27,8 +28,8 @@ class AiEnergyRepository {
   Stream<Map<String, dynamic>?> watchRealDevice() =>
       _watchAiDoc(AppConstants.docRealDevice);
 
-  Stream<Map<String, dynamic>?> _watchAiDoc(String docId) => _db
-      .collection(AppConstants.colAiResults)
+  Stream<Map<String, dynamic>?> _watchAiDoc(String docId) => _scope
+      .col(AppConstants.colAiResults)
       .doc(docId)
       .snapshots()
       .map((snap) => (snap.exists && snap.data() != null) ? snap.data() : null);
@@ -36,8 +37,8 @@ class AiEnergyRepository {
   // ── Device state streams ──────────────────────────────────────────────────
 
   /// Watch all device energy records from device_states collection.
-  Stream<List<EnergyRecord>> watchDeviceStates() => _db
-      .collection(AppConstants.colDeviceStates)
+  Stream<List<EnergyRecord>> watchDeviceStates() => _scope
+      .col(AppConstants.colDeviceStates)
       .snapshots()
       .map(
         (snap) => snap.docs
@@ -48,8 +49,8 @@ class AiEnergyRepository {
   // ── Device control writes ─────────────────────────────────────────────────
 
   /// Send a command to Real_Device_01 (e.g. {'status': 'ON'}).
-  Future<void> sendDeviceControl(Map<String, dynamic> command) => _db
-      .collection(AppConstants.colDeviceControl)
+  Future<void> sendDeviceControl(Map<String, dynamic> command) => _scope
+      .col(AppConstants.colDeviceControl)
       .doc(AppConstants.docRealDevice)
       .set(command, SetOptions(merge: true));
 }

@@ -1,3 +1,5 @@
+import '../../../../core/helper/safe_json.dart';
+
 class AnomalyResult {
   final String id; // simulator or hardware
   final String aiDecision;
@@ -24,14 +26,14 @@ class AnomalyResult {
   factory AnomalyResult.fromFirestore(String id, Map<String, dynamic> data) {
     return AnomalyResult(
       id: id,
-      aiDecision: data['ai_decision'] ?? 'UNKNOWN',
-      watts: (data['watts'] as num?)?.toDouble() ?? 0.0,
-      kwhConsumed: (data['kwh_consumed'] as num?)?.toDouble() ?? 0.0,
-      isAnomaly: data['is_anomaly'] ?? false,
-      probAnomalyPct: (data['prob_anomaly_pct'] as num?)?.toDouble() ?? 0.0,
-      recommendation: data['recommendation'] ?? 'No recommendation available',
-      lastUpdate: data['last_update'] ?? '',
-      voltage: (data['voltage'] as num?)?.toDouble() ?? 0.0,
+      aiDecision: asString(data['ai_decision']) ?? 'UNKNOWN',
+      watts: asDouble(data['watts']) ?? 0.0,
+      kwhConsumed: asDouble(data['kwh_consumed']) ?? 0.0,
+      isAnomaly: asBool(data['is_anomaly']) ?? false,
+      probAnomalyPct: asDouble(data['prob_anomaly_pct']) ?? 0.0,
+      recommendation: asString(data['recommendation']) ?? 'No recommendation available',
+      lastUpdate: asString(data['last_update']) ?? '',
+      voltage: asDouble(data['voltage']) ?? 0.0,
     );
   }
 }

@@ -35,9 +35,9 @@ class DeviceDataBadge extends StatelessWidget {
     return Container(
       padding: EdgeInsetsDirectional.symmetric(horizontal: 10.w, vertical: 2.h),
       decoration: BoxDecoration(
-        color: accent.withOpacity(isDark ? 0.15 : 0.09),
+        color: accent.withValues(alpha: isDark ? 0.15 : 0.09),
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: accent.withOpacity(0.35), width: 1),
+        border: Border.all(color: accent.withValues(alpha: 0.35), width: 1),
       ),
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
@@ -145,7 +145,7 @@ class _SensorStatusPill extends StatelessWidget {
     return Container(
       padding: EdgeInsetsDirectional.symmetric(horizontal: 5.w, vertical: 2.h),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(6.r),
       ),
       child: Text(
@@ -183,7 +183,7 @@ class _DataRow extends StatelessWidget {
               '$label: ',
               style: TextStyle(
                   fontSize: 9.5.sp,
-                  color: textColor.withOpacity(0.5)),
+                  color: textColor.withValues(alpha: 0.5)),
             ),
             Expanded(
               child: Text(

@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+import '../../../core/widgets/tap_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_it/get_it.dart';
@@ -284,15 +284,15 @@ class _TempBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return TapButton(
       onTap: enabled ? onTap : null,
       child: Container(
         padding: EdgeInsets.all(8.w),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: enabled
-              ? primary.withOpacity(0.1)
-              : hintColor.withOpacity(0.08),
+              ? primary.withValues(alpha: 0.1)
+              : hintColor.withValues(alpha: 0.08),
         ),
         child: Icon(icon, size: 18.sp, color: enabled ? primary : hintColor),
       ),
@@ -324,7 +324,7 @@ class _ModeBtn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final active = selected && enabled;
-    return GestureDetector(
+    return TapButton(
       onTap: enabled ? onTap : null,
       child: Container(
         padding: EdgeInsetsDirectional.symmetric(
@@ -332,10 +332,10 @@ class _ModeBtn extends StatelessWidget {
           vertical: 6.h,
         ),
         decoration: BoxDecoration(
-          color: active ? primary.withOpacity(0.15) : Colors.transparent,
+          color: active ? primary.withValues(alpha: 0.15) : Colors.transparent,
           borderRadius: BorderRadius.circular(10.r),
           border: Border.all(
-            color: active ? primary : hintColor.withOpacity(0.3),
+            color: active ? primary : hintColor.withValues(alpha: 0.3),
           ),
         ),
         child: Column(

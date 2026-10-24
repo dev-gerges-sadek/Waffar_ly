@@ -16,8 +16,9 @@ String handleError(Object e, BuildContext context) {
 
   if (e is FirebaseAuthException) {
     return switch (e.code) {
-      'user-not-found'         => l.errUserNotFound,
-      'wrong-password'         => l.errWrongPassword,
+      'user-not-found'         => l.errInvalidCredentials,
+      'wrong-password'         => l.errInvalidCredentials,
+      'invalid-credential'     => l.errInvalidCredentials,
       'email-already-in-use'   => l.errEmailInUse,
       'weak-password'          => l.errWeakPassword,
       'invalid-email'          => l.errInvalidEmail,

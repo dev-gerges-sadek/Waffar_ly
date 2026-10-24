@@ -1,66 +1,58 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../../core/constants/app_constants.dart';
 import '../../../core/l10n/app_localizations.dart';
-import '../models/weather_model.dart';
+import '../data/weather_repository.dart';
 import 'weather_states.dart';
 
 class WeatherCubit extends Cubit<WeatherState> {
-  WeatherCubit({AppLocalizations? l10n})
-      : _l10n = l10n,
-        super(WeatherInitial()) {
+  WeatherCubit(this._repo, {AppLocalizations? l10n})
+    : _l10n = l10n,
+      super(WeatherInitial()) {
     _loadLastCity();
   }
 
-  final _dio = Dio();
+  final WeatherRepository _repo;
   final AppLocalizations? _l10n;
   String? lastCity;
 
   Future<void> _loadLastCity() async {
-    final prefs = await SharedPreferences.getInstance();
-    lastCity = prefs.getString(AppConstants.keyLastCity);
-    if (lastCity != null && lastCity!.isNotEmpty) {
-      getWeather(city: lastCity!);
-    }
+    final city = await _repo.loadLastCity();
+    if (isClosed) return;
+    lastCity = city;
+    if (city != null && city.isNotEmpty) unawaited(getWeather(city: city));
   }
 
   Future<void> getWeather({required String city}) async {
-    if (city.trim().isEmpty) return;
+    final q = city.trim();
+    if (q.isEmpty || q.length > 80) return;
     emit(WeatherLoading());
     try {
-      final response = await _dio.get(
-        '${AppConstants.weatherBaseUrl}/forecast.json',
-        queryParameters: {
-          'key':    AppConstants.weatherApiKey,
-          'q':      city.trim(),
-          'days':   3,
-          'aqi':    'no',
-          'alerts': 'no',
-        },
-      );
-
-      final forecasts = List.generate(
-        3,
-        (i) => WeatherModel.fromJson(
-            Map<String, dynamic>.from(response.data as Map), i),
-      );
-
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(AppConstants.keyLastCity, city.trim());
-      lastCity = city.trim();
-
-      emit(WeatherSuccess(forecasts, city.trim()));
+      final forecasts = await _repo.fetchForecast(q);
+      await _repo.saveLastCity(q);
+      lastCity = q;
+      if (!isClosed) emit(WeatherSuccess(forecasts, q));
+    } on CityNotFoundException {
+      if (!isClosed) {
+        emit(WeatherFailure(
+          _l10n?.cityNotFound ?? 'City not found. Please check the name.',
+        ));
+      }
     } on DioException catch (e) {
-      final serverMsg =
-          e.response?.data?['error']?['message'] as String?;
-      final fallback = _l10n?.cityNotFound ??
-          'City not found. Please check the name.';
-      emit(WeatherFailure(serverMsg ?? fallback));
+      // 400 from WeatherAPI = unknown location; anything else = connectivity.
+      final notFound = e.response?.statusCode == 400;
+      final fallback = notFound
+          ? (_l10n?.cityNotFound ?? 'City not found. Please check the name.')
+          : (_l10n?.errNoNetwork ?? 'No internet connection.');
+      if (!isClosed) emit(WeatherFailure(fallback));
     } catch (_) {
-      final fallback = _l10n?.errNoNetwork ??
-          'Could not load weather. Check your connection.';
-      emit(WeatherFailure(fallback));
+      if (!isClosed) {
+        emit(
+          WeatherFailure(
+            _l10n?.errNoNetwork ?? 'Could not load weather. Check your connection.',
+          ),
+        );
+      }
     }
   }
 

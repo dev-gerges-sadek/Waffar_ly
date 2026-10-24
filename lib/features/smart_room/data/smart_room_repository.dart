@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/data/home_scope.dart';
 import '../../../core/shared/domain/entities/music_info.dart';
 import '../../../core/shared/domain/entities/smart_device.dart';
 import '../../../core/shared/domain/entities/smart_room.dart';
@@ -7,8 +8,8 @@ import '../../../core/shared/domain/entities/smart_room.dart';
 /// All Firestore writes for smart room controls.
 /// Also serves as the single source of SmartRoom instances.
 class SmartRoomRepository {
-  SmartRoomRepository() : _db = FirebaseFirestore.instance;
-  final FirebaseFirestore _db;
+  SmartRoomRepository(this._scope);
+  final HomeScope _scope;
 
   // ── Room list (built from static registry — no Firestore collection) ───────
 
@@ -37,7 +38,7 @@ class SmartRoomRepository {
     required String mode,
     required int    fanSpeed,
   }) async {
-    await _db.collection(AppConstants.colDeviceStates)
+    await _scope.col(AppConstants.colDeviceStates)
         .doc('AC_BR_0$roomId')
         .set({
           'status':       isOn ? 'ON' : 'OFF',
@@ -55,7 +56,7 @@ class SmartRoomRepository {
     required bool   isOn,
     double?         intensity,
   }) async {
-    await _db.collection(AppConstants.colDeviceStates).doc(deviceId).set({
+    await _scope.col(AppConstants.colDeviceStates).doc(deviceId).set({
       'status':       isOn ? 'ON' : 'OFF',
       'intensity': ?intensity,
       'last_updated': FieldValue.serverTimestamp(),
@@ -65,7 +66,7 @@ class SmartRoomRepository {
   // ── Generic device toggle ──────────────────────────────────────────────────
 
   Future<void> toggleDevice(String deviceId, bool isOn) async {
-    await _db.collection(AppConstants.colDeviceStates).doc(deviceId).set({
+    await _scope.col(AppConstants.colDeviceStates).doc(deviceId).set({
       'status':       isOn ? 'ON' : 'OFF',
       'last_updated': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));

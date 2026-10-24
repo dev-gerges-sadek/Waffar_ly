@@ -24,7 +24,7 @@ class DeviceLegendBar extends StatelessWidget {
       padding: EdgeInsetsDirectional.symmetric(horizontal: 14.w, vertical: 10.h),
       decoration: BoxDecoration(
         color: isDark
-            ? SHColors.darkSurfaceColor.withOpacity(0.5)
+            ? SHColors.darkSurfaceColor.withValues(alpha: 0.5)
             : SHColors.lightSurfaceColor,
         borderRadius: BorderRadius.circular(14.r),
       ),
@@ -56,9 +56,9 @@ class _LegendChip extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         padding: EdgeInsetsDirectional.symmetric(horizontal: 10.w, vertical: 4.h),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.12),
+          color: color.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(color: color.withOpacity(0.4)),
+          border: Border.all(color: color.withValues(alpha: 0.4)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -120,7 +120,7 @@ class _SummaryChip extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         padding: EdgeInsetsDirectional.symmetric(horizontal: 10.w, vertical: 4.h),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8.r),
         ),
         child: Text(

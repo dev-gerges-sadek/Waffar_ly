@@ -34,7 +34,7 @@ class TitleHeaderWidget extends StatelessWidget {
           subtitle,
           style: TextStyle(
             fontSize: context.sp(13),
-            color: onSurface.withOpacity(0.65),
+            color: onSurface.withValues(alpha: 0.65),
           ),
         ),
       ],

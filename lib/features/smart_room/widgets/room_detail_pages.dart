@@ -1,5 +1,5 @@
-// ignore_for_file: deprecated_member_use
 
+import '../../../core/widgets/tap_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -169,7 +169,7 @@ class RoomTabButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return TapButton(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -180,13 +180,13 @@ class RoomTabButton extends StatelessWidget {
         decoration: BoxDecoration(
           // Colors.transparent → surface token at 0 opacity (same visual, compliant)
           color: selected
-              ? primary.withOpacity(0.12)
-              : SHColors.surface(context).withOpacity(0),
+              ? primary.withValues(alpha: 0.12)
+              : SHColors.surface(context).withValues(alpha: 0),
           borderRadius: BorderRadius.circular(8.r),
           border: Border.all(
             color: selected
-                ? primary.withOpacity(0.40)
-                : SHColors.surface(context).withOpacity(0),
+                ? primary.withValues(alpha: 0.40)
+                : SHColors.surface(context).withValues(alpha: 0),
           ),
         ),
         child: Row(

@@ -1,4 +1,3 @@
-// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../theme/sh_colors.dart';
@@ -20,10 +19,10 @@ class ElevatedCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(14.r),
         border: Border.all(color: SHColors.lightShadowColor),
         boxShadow: [
-          BoxShadow(
+          const BoxShadow(
             color: SHColors.lightShadowColor,
             blurRadius: 10,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
           ),
         ],
       ),

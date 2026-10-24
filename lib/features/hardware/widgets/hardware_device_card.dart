@@ -1,4 +1,3 @@
-// ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -25,10 +24,10 @@ class HardwareDeviceCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(color: statusColor.withOpacity(0.35), width: 1.2),
+        border: Border.all(color: statusColor.withValues(alpha: 0.35), width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: statusColor.withOpacity(0.08),
+            color: statusColor.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, 3),
           ),
@@ -42,7 +41,7 @@ class HardwareDeviceCard extends StatelessWidget {
               Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: primary.withOpacity(0.12),
+                  color: primary.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(Icons.memory_rounded,
@@ -51,7 +50,7 @@ class HardwareDeviceCard extends StatelessWidget {
               SizedBox(width: 8.w),
               Expanded(
                 child: Text(
-                  device.displayName,
+                  AppLocalizations.of(context).translateDeviceOrRoomName(device.id),
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w700,
@@ -68,7 +67,7 @@ class HardwareDeviceCard extends StatelessWidget {
                   color: statusColor,
                   boxShadow: [
                     BoxShadow(
-                        color: statusColor.withOpacity(0.5),
+                        color: statusColor.withValues(alpha: 0.5),
                         blurRadius: 6),
                   ],
                 ),
@@ -109,7 +108,7 @@ class HardwareDeviceCard extends StatelessWidget {
             padding: EdgeInsetsDirectional.symmetric(
                 horizontal: 6.w, vertical: 2.h),
             decoration: BoxDecoration(
-              color: primary.withOpacity(0.08),
+              color: primary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(6.r),
             ),
             child: Text(

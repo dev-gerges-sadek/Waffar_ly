@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/data/home_scope.dart';
 
 /// Builds the live-data context block injected into every AI prompt turn.
 ///
@@ -11,9 +12,9 @@ import '../../../core/constants/app_constants.dart';
 ///   • Each Firestore section is independently guarded — one failure never
 ///     blocks the others.
 class ChatbotContextSource {
-  ChatbotContextSource() : _firestore = FirebaseFirestore.instance;
+  ChatbotContextSource(this._scope);
 
-  final FirebaseFirestore _firestore;
+  final HomeScope _scope;
 
   // Sentinel — consumed only by the AI; never shown to the user.
   static const _absent = '__ABSENT__';
@@ -28,7 +29,8 @@ class ChatbotContextSource {
   }) {
     final v = d[key];
     if (v == null) return _absent;
-    final n = (v as num).toDouble();
+    if (v is! num) return _absent;
+    final n = v.toDouble();
     if (n == 0.0) return _absent;
     final s = n == n.truncateToDouble()
         ? n.toInt().toString()
@@ -37,7 +39,10 @@ class ChatbotContextSource {
   }
 
   static String _s(Map<String, dynamic> d, String key) {
-    final v = d[key]?.toString().trim();
+    // Firestore text is untrusted (any writer can change it): flatten to a
+    // single bounded line so it cannot smuggle multi-line instructions.
+    var v = d[key]?.toString().replaceAll(RegExp(r'\s+'), ' ').trim();
+    if (v != null && v.length > 120) v = v.substring(0, 120);
     return (v == null || v.isEmpty) ? _absent : v;
   }
 
@@ -178,8 +183,8 @@ ${parts.join('\n\n')}
     String collection,
     String docId,
   ) =>
-      _firestore
-          .collection(collection)
+      _scope
+          .col(collection)
           .doc(docId)
           .get()
           .timeout(const Duration(seconds: 10));
@@ -196,14 +201,14 @@ ${parts.join('\n\n')}
       data.forEach((k, v) => buf.writeln('  $k: $v'));
       parts.add(buf.toString().trimRight());
     } catch (e) {
-      debugPrint('[ChatbotContextSource] $section error: $e');
+      if (kDebugMode) debugPrint('[ChatbotContextSource] $section error: $e');
     }
   }
 
   Future<void> _addDeviceStates(List<String> parts) async {
     try {
-      final snap = await _firestore
-          .collection(AppConstants.colDeviceStates)
+      final snap = await _scope
+          .col(AppConstants.colDeviceStates)
           .get()
           .timeout(const Duration(seconds: 10));
       if (snap.docs.isEmpty) return;
@@ -212,11 +217,11 @@ ${parts.join('\n\n')}
         final d      = doc.data();
         final watts  = _n(d, 'watts',  unit: 'W');
         final status = _s(d, 'status');
-        buf.writeln('  ${doc.id}: watts=$watts  status=$status');
+        buf.writeln('  ${doc.id.length > 40 ? doc.id.substring(0, 40) : doc.id}: watts=$watts  status=$status');
       }
       parts.add(buf.toString().trimRight());
     } catch (e) {
-      debugPrint('[ChatbotContextSource] DEVICE_STATES error: $e');
+      if (kDebugMode) debugPrint('[ChatbotContextSource] DEVICE_STATES error: $e');
     }
   }
 }

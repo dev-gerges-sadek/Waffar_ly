@@ -1,4 +1,3 @@
-// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -18,6 +17,7 @@ class BackgroundRoomCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cardColor = SHColors.card(context);
+    final l10n = AppLocalizations.of(context);
 
     return Transform(
       transform: Matrix4.translationValues(0, 80 * translation, 0),
@@ -35,19 +35,19 @@ class BackgroundRoomCard extends StatelessWidget {
           children: [
             _RoomInfoRow(
               icon: const Icon(SHIcons.thermostat),
-              label: const Text('Temperature'),
+              label: Text(l10n.temperature),
               data: '${room.temperature}°',
             ),
             SizedBox(height: 4.h),
             _RoomInfoRow(
               icon: const Icon(SHIcons.waterDrop),
-              label: const Text('Air Humidity'),
+              label: Text(l10n.airHumidity),
               data: '${room.airHumidity}%',
             ),
             SizedBox(height: 4.h),
-            const _RoomInfoRow(
-              icon: Icon(SHIcons.timer),
-              label: Text('Timer'),
+            _RoomInfoRow(
+              icon: const Icon(SHIcons.timer),
+              label: Text(l10n.timer),
               data: null,
             ),
             SizedBox(height: 12.h),
@@ -60,19 +60,19 @@ class BackgroundRoomCard extends StatelessWidget {
                   _DeviceIconSwitcher(
                     onTap: (_) {},
                     icon: const Icon(SHIcons.lightBulbOutline),
-                    label: const Text('Lights'),
+                    label: Text(l10n.lights),
                     value: room.lights.isOn,
                   ),
                   _DeviceIconSwitcher(
                     onTap: (_) {},
                     icon: const Icon(SHIcons.fan),
-                    label: const Text('Air-con'),
+                    label: Text(l10n.airConditioning),
                     value: room.airCondition.isOn,
                   ),
                   _DeviceIconSwitcher(
                     onTap: (_) {},
                     icon: const Icon(SHIcons.music),
-                    label: const Text('Music'),
+                    label: Text(l10n.music),
                     value: room.musicInfo.isOn,
                   ),
                 ],
@@ -169,7 +169,7 @@ class _RoomInfoRow extends StatelessWidget {
             child: DefaultTextStyle(
               style: TextStyle(
                 fontSize: 11.sp,
-                color: data == null ? textColor.withOpacity(0.6) : hintColor,
+                color: data == null ? textColor.withValues(alpha: 0.6) : hintColor,
               ),
               child: label,
             ),
@@ -194,7 +194,7 @@ class _RoomInfoRow extends StatelessWidget {
                   style: GoogleFonts.montserrat(
                     fontWeight: FontWeight.w800,
                     fontSize: 11.sp,
-                    color: textColor.withOpacity(0.6),
+                    color: textColor.withValues(alpha: 0.6),
                   ),
                 ),
               ],

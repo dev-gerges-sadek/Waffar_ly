@@ -16,7 +16,7 @@ class SmartRoomCubit extends Cubit<SmartRoomState> {
       final rooms = await _repository.getRooms();
       if (!isClosed) emit(SmartRoomLoaded(rooms));
     } catch (e) {
-      if (!isClosed) emit(SmartRoomError(e.toString()));
+      if (!isClosed) emit(SmartRoomError('load_failed'));
     }
   }
 }

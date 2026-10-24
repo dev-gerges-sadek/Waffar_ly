@@ -1,7 +1,7 @@
 //login states
 sealed class AuthStates {}
 
-class IntialState extends AuthStates {}
+class InitialState extends AuthStates {}
 
 class LoginLoadingState extends AuthStates {}
 

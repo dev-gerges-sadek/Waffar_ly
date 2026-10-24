@@ -6,6 +6,7 @@ import '../../../core/l10n/app_localizations.dart';
 import '../../../core/theme/sh_colors.dart';
 import '../../ai_dashboard/cubit/ai_energy_cubit.dart';
 import '../cubit/device_control_cubit.dart';
+import '../data/hardware_repository.dart';
 import '../cubit/device_control_state.dart';
 import '../cubit/hardware_cubit.dart';
 import '../cubit/hardware_states.dart';
@@ -19,8 +20,11 @@ class HardwareScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MultiBlocProvider(
         providers: [
-          BlocProvider(create: (_) => HardwareCubit()..startListening()),
-          BlocProvider(create: (_) => DeviceControlCubit()),
+          BlocProvider(
+              create: (_) =>
+                  HardwareCubit(GetIt.I<HardwareRepository>())..startListening()),
+          BlocProvider(
+              create: (_) => DeviceControlCubit(GetIt.I<HardwareRepository>())),
           BlocProvider(
               create: (_) => GetIt.I<AiEnergyCubit>()..startListening()),
         ],
@@ -47,6 +51,7 @@ class _HardwareView extends StatelessWidget {
             : SHColors.lightBackgroundColor,
         elevation: 0,
         leading: IconButton(
+        tooltip: MaterialLocalizations.of(context).backButtonTooltip,
           icon: Icon(Icons.arrow_back_ios_new_rounded,
               color: textColor, size: 20),
           onPressed: () => Navigator.pop(context),
@@ -174,13 +179,13 @@ class _EmptyTile extends StatelessWidget {
         width: double.infinity,
         padding: EdgeInsets.all(24.w),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.05),
+          color: color.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: color.withOpacity(0.2)),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
         ),
         child: Column(
           children: [
-            Icon(icon, size: 32.sp, color: color.withOpacity(0.5)),
+            Icon(icon, size: 32.sp, color: color.withValues(alpha: 0.5)),
             SizedBox(height: 8.h),
             Text(
               message,
@@ -227,7 +232,7 @@ class _ControlPanel extends StatelessWidget {
           decoration: BoxDecoration(
             color: cardColor,
             borderRadius: BorderRadius.circular(16.r),
-            border: Border.all(color: primary.withOpacity(0.2)),
+            border: Border.all(color: primary.withValues(alpha: 0.2)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -253,7 +258,7 @@ class _ControlPanel extends StatelessWidget {
                       padding: EdgeInsetsDirectional.symmetric(
                           horizontal: 6.w, vertical: 2.h),
                       decoration: BoxDecoration(
-                        color: success.withOpacity(0.12),
+                        color: success.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(6.r),
                       ),
                       child: Row(
@@ -263,7 +268,7 @@ class _ControlPanel extends StatelessWidget {
                               size: 10.sp, color: success),
                           SizedBox(width: 3.w),
                           Text(
-                            l10n.isArabic ? 'متزامن' : 'Synced',
+                            l10n.synced,
                             style: TextStyle(
                                 fontSize: 8.sp,
                                 color: success,
@@ -281,7 +286,7 @@ class _ControlPanel extends StatelessWidget {
                 duration: const Duration(milliseconds: 300),
                 padding: EdgeInsets.all(14.w),
                 decoration: BoxDecoration(
-                  color: stateColor.withOpacity(0.07),
+                  color: stateColor.withValues(alpha: 0.07),
                   borderRadius: BorderRadius.circular(12.r),
                   border: Border.all(color: stateColor, width: 1.5),
                 ),
@@ -331,7 +336,7 @@ class _ControlPanel extends StatelessWidget {
                             'Control/Real_Device_01 → relayState',
                             style: TextStyle(
                                 fontSize: 8.sp,
-                                color: hintColor.withOpacity(0.5)),
+                                color: hintColor.withValues(alpha: 0.5)),
                           ),
                         ],
                       ),
@@ -349,7 +354,7 @@ class _ControlPanel extends StatelessWidget {
                           )
                         : Switch.adaptive(
                             value: relayOn,
-                            activeColor: success,
+                            activeThumbColor: success,
                             onChanged: (val) => context
                                 .read<DeviceControlCubit>()
                                 .toggleRelayState(val),
@@ -364,7 +369,7 @@ class _ControlPanel extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.all(10.w),
                   decoration: BoxDecoration(
-                    color: errColor.withOpacity(0.08),
+                    color: errColor.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(8.r),
                   ),
                   child: Row(
@@ -374,7 +379,7 @@ class _ControlPanel extends StatelessWidget {
                       SizedBox(width: 8.w),
                       Expanded(
                         child: Text(
-                          '${l10n.error}${state.message}',
+                          l10n.errGeneric,
                           style: TextStyle(
                               fontSize: 10.sp, color: errColor),
                           maxLines: 2,
@@ -416,14 +421,14 @@ class _DeviceDataCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(device.displayName,
+          Text(AppLocalizations.of(context).translateDeviceOrRoomName(device.id),
               style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w700,

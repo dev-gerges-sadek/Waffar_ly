@@ -112,7 +112,7 @@ class RoomDetailItems extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 11.sp,
-                        color: onPrimary.withOpacity(0.75),
+                        color: onPrimary.withValues(alpha: 0.75),
                         letterSpacing: 1.2,
                         fontWeight: FontWeight.w600,
                       ),

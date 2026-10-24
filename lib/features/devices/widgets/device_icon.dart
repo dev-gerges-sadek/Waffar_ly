@@ -30,10 +30,10 @@ class DeviceIcon extends StatelessWidget {
           height: 44.w,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: isOn ? primary.withOpacity(0.15) : hint.withOpacity(0.1),
+            color: isOn ? primary.withValues(alpha: 0.15) : hint.withValues(alpha: 0.1),
             border: hwOnline
                 ? Border.all(
-                    color: success.withOpacity(0.6),
+                    color: success.withValues(alpha: 0.6),
                     width: 1.5,
                   )
                 : null,

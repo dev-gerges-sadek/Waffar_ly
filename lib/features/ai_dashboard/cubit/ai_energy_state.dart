@@ -3,6 +3,7 @@
 // Sealed state hierarchy for the unified AI + Energy dashboard cubit.
 // ============================================================================
 
+import '../../../core/l10n/app_localizations.dart';
 import '../models/ai_result.dart';
 import '../models/energy_record.dart';
 
@@ -12,31 +13,13 @@ import '../models/energy_record.dart';
 enum SystemHealthStatus { healthy, caution, critical, loading }
 
 extension SystemHealthStatusX on SystemHealthStatus {
-  /// Locale-aware label.
-  String label(bool isArabic) {
-    if (isArabic) {
-      switch (this) {
-        case SystemHealthStatus.healthy:
-          return 'طبيعي';
-        case SystemHealthStatus.caution:
-          return 'تحذير';
-        case SystemHealthStatus.critical:
-          return 'حرج';
-        case SystemHealthStatus.loading:
-          return 'جارٍ التحميل…';
-      }
-    }
-    switch (this) {
-      case SystemHealthStatus.healthy:
-        return 'Healthy';
-      case SystemHealthStatus.caution:
-        return 'Caution';
-      case SystemHealthStatus.critical:
-        return 'Critical';
-      case SystemHealthStatus.loading:
-        return 'Loading…';
-    }
-  }
+  /// Locale-aware label (text lives in the ARB files).
+  String label(AppLocalizations l) => switch (this) {
+    SystemHealthStatus.healthy => l.healthHealthy,
+    SystemHealthStatus.caution => l.healthCaution,
+    SystemHealthStatus.critical => l.healthCritical,
+    SystemHealthStatus.loading => l.healthLoading,
+  };
 
   String get emoji {
     switch (this) {

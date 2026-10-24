@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
+import 'package:just_audio/just_audio.dart' show PlayerState;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:waffar_ly_app/core/services/music_service.dart';
 import '../data/deezer_data_source.dart';
@@ -8,9 +9,9 @@ import '../models/music_track.dart';
 import 'music_states.dart';
 
 class MusicCubit extends Cubit<MusicState> {
-  MusicCubit()
-    : _source = DeezerDataSource(),
-      _musicService = GetIt.I<MusicService>(),
+  MusicCubit({DeezerDataSource? source, MusicService? musicService})
+    : _source = source ?? GetIt.I<DeezerDataSource>(),
+      _musicService = musicService ?? GetIt.I<MusicService>(),
       super(const MusicInitial()) {
     _playbackSub = _musicService.playerStateStream.listen((_) {
       _syncPlayback();
@@ -20,7 +21,7 @@ class MusicCubit extends Cubit<MusicState> {
 
   final DeezerDataSource _source;
   final MusicService _musicService;
-  late final StreamSubscription _playbackSub;
+  late final StreamSubscription<PlayerState> _playbackSub;
 
   MusicTrack? get nowPlaying => _musicService.currentTrack;
   bool get isPlaying => _musicService.isPlaying;
@@ -43,7 +44,7 @@ class MusicCubit extends Cubit<MusicState> {
     } on DioException catch (e) {
       emit(MusicError(_dioMsg(e)));
     } catch (e) {
-      emit(MusicError('Could not load tracks: $e'));
+      emit(const MusicError('load_failed'));
     }
   }
 
@@ -68,7 +69,7 @@ class MusicCubit extends Cubit<MusicState> {
     } on DioException catch (e) {
       emit(MusicError(_dioMsg(e)));
     } catch (_) {
-      emit(const MusicError('Search failed. Please try again.'));
+      emit(const MusicError('search_failed'));
     }
   }
 
@@ -100,6 +101,7 @@ class MusicCubit extends Cubit<MusicState> {
   }
 
   void _syncPlayback() {
+    if (isClosed) return;
     final s = state;
     if (s is MusicLoaded) {
       emit(
@@ -118,9 +120,9 @@ class MusicCubit extends Cubit<MusicState> {
   String _dioMsg(DioException e) {
     if (e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.receiveTimeout) {
-      return 'Connection timeout. Check your internet.';
+      return 'timeout';
     }
-    return 'Network error (${e.response?.statusCode}). Please try again.';
+    return 'network';
   }
 
   @override

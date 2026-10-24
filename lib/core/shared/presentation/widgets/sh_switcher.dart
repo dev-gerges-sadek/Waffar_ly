@@ -1,4 +1,3 @@
-// ignore_for_file: deprecated_member_use
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -41,8 +40,8 @@ class SHSwitcher extends StatelessWidget {
             const SizedBox(width: 8),
           ],
           CupertinoSwitch(
-            trackColor: trackColor,
-            activeColor: primaryColor,
+            inactiveTrackColor: trackColor,
+            activeTrackColor: primaryColor,
             thumbColor: value ? null : hintColor,
             value: value,
             onChanged: onChanged,

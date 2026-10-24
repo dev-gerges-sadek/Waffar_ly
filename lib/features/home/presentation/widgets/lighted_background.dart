@@ -1,4 +1,3 @@
-// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:waffar_ly_app/core/theme/sh_colors.dart';
 
@@ -48,8 +47,8 @@ class LightedBackground extends StatelessWidget {
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      primaryColor.withOpacity(0.15),
-                      primaryColor.withOpacity(0),
+                      primaryColor.withValues(alpha: 0.15),
+                      primaryColor.withValues(alpha: 0),
                     ],
                   ),
                 ),
@@ -65,8 +64,8 @@ class LightedBackground extends StatelessWidget {
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      secondaryColor.withOpacity(0.12),
-                      secondaryColor.withOpacity(0),
+                      secondaryColor.withValues(alpha: 0.12),
+                      secondaryColor.withValues(alpha: 0),
                     ],
                   ),
                 ),
@@ -82,8 +81,8 @@ class LightedBackground extends StatelessWidget {
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      accentColor.withOpacity(0.08),
-                      accentColor.withOpacity(0),
+                      accentColor.withValues(alpha: 0.08),
+                      accentColor.withValues(alpha: 0),
                     ],
                   ),
                 ),

@@ -1,4 +1,3 @@
-// ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:waffar_ly_app/core/theme/sh_colors.dart';
@@ -37,9 +36,9 @@ class _ShimmerArrowsState extends State<ShimmerArrows>
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [
-        baseColor.withOpacity(0.1),
+        baseColor.withValues(alpha: 0.1),
         baseColor,
-        baseColor.withOpacity(0.1)
+        baseColor.withValues(alpha: 0.1)
       ],
       stops: const [0.0, 0.3, 1],
       transform: _SlideGradientTransform(_controller.value),

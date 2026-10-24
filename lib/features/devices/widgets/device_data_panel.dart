@@ -1,4 +1,3 @@
-// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:waffar_ly_app/core/theme/sh_colors.dart';
@@ -38,9 +37,9 @@ class DeviceDataPanel extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        color: accentColor.withOpacity(0.07),
+        color: accentColor.withValues(alpha: 0.07),
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: accentColor.withOpacity(0.25)),
+        border: Border.all(color: accentColor.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,3 +1,4 @@
+import '../../../core/widgets/tap_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/app/app_routes.dart';
@@ -113,8 +114,8 @@ class _SignInScreenState extends State<SignInScreen> {
                       hintText: '••••••••',
                       icon: Icons.lock_outline,
                       obscureText: true,
-                      validator: (v) => (v == null || v.length < 6)
-                          ? l10n.errWeakPassword : null,
+                      validator: (v) => (v == null || v.isEmpty)
+                          ? l10n.errPasswordRequired : null,
                     ),
 
                     // ── Forgot password ───────────────────────────────
@@ -158,7 +159,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                 fontSize: context.sp(13),
                                 color: Theme.of(context).colorScheme.onSurface,
                               )),
-                          GestureDetector(
+                          TapButton(
                             onTap: () => Navigator.pushNamed(
                                 context, AppRoutes.signup),
                             child: Text(

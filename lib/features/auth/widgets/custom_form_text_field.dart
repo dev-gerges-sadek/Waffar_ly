@@ -1,4 +1,3 @@
-// ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:waffar_ly_app/core/helper/extensions/media_query.dart';
@@ -40,7 +39,7 @@ class CustomFormTextField extends StatelessWidget {
         fillColor: colorScheme.surface,
         labelText: labelText,
         hintText: hintText,
-        hintStyle: TextStyle(color: colorScheme.onSurface.withOpacity(0.4)),
+        hintStyle: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.4)),
         prefixIcon: Icon(icon, color: colorScheme.primary),
         contentPadding: EdgeInsetsDirectional.symmetric(
           horizontal: context.w(16),
@@ -49,7 +48,7 @@ class CustomFormTextField extends StatelessWidget {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(context.w(12)),
           borderSide: BorderSide(
-            color: colorScheme.outline.withOpacity(0.3),
+            color: colorScheme.outline.withValues(alpha: 0.3),
           ),
         ),
         focusedBorder: OutlineInputBorder(

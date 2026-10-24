@@ -1,4 +1,3 @@
-// ignore_for_file: deprecated_member_use
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -136,7 +135,7 @@ class CameraIconButton extends StatelessWidget {
             MaterialPageRoute(builder: (_) => RoomDevicesScreen(room: room)),
           ),
           icon: Icon(Icons.devices_outlined, color: textColor),
-          tooltip: 'View Devices',
+          tooltip: AppLocalizations.of(context).viewDevices,
         ),
       ),
     );

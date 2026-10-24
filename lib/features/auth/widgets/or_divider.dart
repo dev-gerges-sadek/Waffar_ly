@@ -1,3 +1,4 @@
+import '../../../core/widgets/tap_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/helper/extensions/media_query.dart';
@@ -21,18 +22,18 @@ class OrDivider extends StatelessWidget {
         SizedBox(height: context.h(16)),
         Row(
           children: [
-            Expanded(child: Divider(color: onSurf.withOpacity(0.2), thickness: 1)),
+            Expanded(child: Divider(color: onSurf.withValues(alpha: 0.2), thickness: 1)),
             Padding(
               padding: EdgeInsetsDirectional.symmetric(horizontal: context.w(12)),
               child: Text(
                 '${l10n.language == 'العربية' ? 'أو تسجيل' : 'Or'} $divLabel ${l10n.language == 'العربية' ? 'بواسطة' : 'with'}',
                 style: TextStyle(
                   fontSize: context.sp(13),
-                  color: onSurf.withOpacity(0.6),
+                  color: onSurf.withValues(alpha: 0.6),
                 ),
               ),
             ),
-            Expanded(child: Divider(color: onSurf.withOpacity(0.2), thickness: 1)),
+            Expanded(child: Divider(color: onSurf.withValues(alpha: 0.2), thickness: 1)),
           ],
         ),
         SizedBox(height: context.h(16)),
@@ -41,14 +42,14 @@ class OrDivider extends StatelessWidget {
           children: [
             _SocialBtn(
               bgColor: surface,
-              borderColor: onSurf.withOpacity(0.2),
+              borderColor: onSurf.withValues(alpha: 0.2),
               onTap: () {},
               child: Icon(Icons.apple, color: onSurf, size: 24),
             ),
             SizedBox(width: context.w(16)),
             _SocialBtn(
               bgColor: surface,
-              borderColor: onSurf.withOpacity(0.2),
+              borderColor: onSurf.withValues(alpha: 0.2),
               onTap: () => context.read<AuthCubit>().signInWithGoogle(),
               child: SizedBox(
                 width: context.w(24),
@@ -80,7 +81,7 @@ class _SocialBtn extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
+  Widget build(BuildContext context) => TapButton(
         onTap: onTap,
         child: Container(
           width: 52,

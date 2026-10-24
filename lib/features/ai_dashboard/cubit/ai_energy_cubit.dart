@@ -51,10 +51,20 @@ class AiEnergyCubit extends Cubit<AiEnergyState> {
     _subscribeDevices();
   }
 
+  /// Pull-to-refresh: re-subscribes silently (no Loading flash) and resolves
+  /// once fresh data had a moment to arrive.
+  Future<void> refresh() async {
+    if (isClosed) return;
+    _subscribeAi();
+    _subscribeDevices();
+    await Future<void>.delayed(const Duration(milliseconds: 700));
+  }
+
   /// Update electricity rate and persist to SharedPreferences.
   Future<void> updateRate(double newRate) async {
-    if (newRate <= 0) return;
+    if (newRate <= 0 || newRate > 100) return;
     _rate = newRate;
+    _prefs = await SharedPreferences.getInstance();
     await _prefs.setDouble(AppConstants.keyElectricityRate, newRate);
     _emitLoaded();
   }

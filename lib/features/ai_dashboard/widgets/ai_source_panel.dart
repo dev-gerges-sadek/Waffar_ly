@@ -4,8 +4,8 @@
 // AI analysis results. Responsive via LayoutBuilder.
 // ============================================================================
 
-// ignore_for_file: deprecated_member_use
 
+import '../../../core/widgets/tap_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -103,7 +103,7 @@ class _AiSourceCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? SHColors.darkCardColor : SHColors.lightCardColor,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: sevColor.withOpacity(0.25)),
+        border: Border.all(color: sevColor.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,7 +117,7 @@ class _AiSourceCard extends StatelessWidget {
                   vertical: 3.h,
                 ),
                 decoration: BoxDecoration(
-                  color: accentColor.withOpacity(0.12),
+                  color: accentColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Row(
@@ -142,7 +142,7 @@ class _AiSourceCard extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   alignment: AlignmentDirectional.centerEnd,
                   child: _DecisionBadge(
-                    label: result.severity.localLabel(l10n.isArabic),
+                    label: result.severity.localLabel(l10n),
                     emoji: result.severity.emoji,
                     color: sevColor,
                   ),
@@ -195,9 +195,10 @@ class _AiSourceCard extends StatelessWidget {
               SizedBox(width: 6.w),
               _CostChip(
                 label: l10n.forecast,
-                value:
-                    '${result.predictedMonthlyEgp.toStringAsFixed(0)} ${l10n.billLabel}',
-                color: accentColor,
+                value: result.predictedMonthlyEgp > 0
+                    ? '${result.predictedMonthlyEgp.toStringAsFixed(0)} ${l10n.billLabel}'
+                    : 'N/A',
+                color: result.predictedMonthlyEgp > 0 ? accentColor : hintColor,
                 hint: hintColor,
               ),
             ],
@@ -239,9 +240,9 @@ class _DecisionBadge extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: EdgeInsetsDirectional.symmetric(horizontal: 8.w, vertical: 3.h),
     decoration: BoxDecoration(
-      color: color.withOpacity(0.13),
+      color: color.withValues(alpha: 0.13),
       borderRadius: BorderRadius.circular(16.r),
-      border: Border.all(color: color.withOpacity(0.35)),
+      border: Border.all(color: color.withValues(alpha: 0.35)),
     ),
     child: Text(
       emoji.isNotEmpty ? '$emoji $label' : label,
@@ -295,7 +296,7 @@ class _MiniProbBar extends StatelessWidget {
         child: LinearProgressIndicator(
           value: (probAnomaly / 100).clamp(0.0, 1.0),
           minHeight: 5.h,
-          backgroundColor: SHColors.lightSeverityNormal.withOpacity(0.20),
+          backgroundColor: SHColors.lightSeverityNormal.withValues(alpha: 0.20),
           valueColor: AlwaysStoppedAnimation(color),
         ),
       ),
@@ -378,21 +379,21 @@ class AiStatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return GestureDetector(
+    return TapButton(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
-          color: color.withOpacity(isDark ? 0.10 : 0.07),
+          color: color.withValues(alpha: isDark ? 0.10 : 0.07),
           borderRadius: BorderRadius.circular(18.r),
           border: Border.all(
-            color: color.withOpacity(isDark ? 0.30 : 0.22),
+            color: color.withValues(alpha: isDark ? 0.30 : 0.22),
             width: 1.2,
           ),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(isDark ? 0.12 : 0.08),
+              color: color.withValues(alpha: isDark ? 0.12 : 0.08),
               blurRadius: 14,
               offset: const Offset(0, 5),
             ),
@@ -409,7 +410,7 @@ class AiStatCard extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.all(7.w),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.15),
+                    color: color.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10.r),
                   ),
                   child: Icon(icon, color: color, size: 16.sp),
@@ -440,7 +441,7 @@ class AiStatCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 9.sp,
                         fontWeight: FontWeight.w500,
-                        color: color.withOpacity(0.7),
+                        color: color.withValues(alpha: 0.7),
                       ),
                     ),
                   ],
@@ -467,7 +468,7 @@ class AiStatCard extends StatelessWidget {
                 sublabel!,
                 style: TextStyle(
                   fontSize: 8.5.sp,
-                  color: SHColors.hint(context).withOpacity(0.6),
+                  color: SHColors.hint(context).withValues(alpha: 0.6),
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -496,7 +497,7 @@ class _TrendBadge extends StatelessWidget {
     return Container(
       padding: EdgeInsetsDirectional.symmetric(horizontal: 5.w, vertical: 2.h),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.14),
+        color: color.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(6.r),
       ),
       child: Row(

@@ -1,3 +1,6 @@
+/// Locale-independent advice code; text comes from the ARB files.
+enum AcAdvice { veryHot, warm, cold }
+
 class WeatherModel {
   final String cityName;
   final String country;
@@ -28,33 +31,36 @@ class WeatherModel {
   });
 
   factory WeatherModel.fromJson(Map<String, dynamic> json, int dayIndex) {
-    final day     = json['forecast']['forecastday'][dayIndex]['day'];
-    final current = json['current'];
-    final loc     = json['location'];
+    Map<String, dynamic> m(Object? v) => Map<String, dynamic>.from(v as Map);
+    final forecastDay =
+        m(((m(json['forecast'])['forecastday']) as List)[dayIndex]);
+    final day       = m(forecastDay['day']);
+    final condition = m(day['condition']);
+    final current   = m(json['current']);
+    final loc       = m(json['location']);
+    double n(Object? v) => (v as num).toDouble();
     return WeatherModel(
       cityName:  loc['name']    as String,
       country:   loc['country'] as String,
-      date:      json['forecast']['forecastday'][dayIndex]['date'] as String,
-      avgTemp:   (day['avgtemp_c']  as num).toDouble(),
-      minTemp:   (day['mintemp_c']  as num).toDouble(),
-      maxTemp:   (day['maxtemp_c']  as num).toDouble(),
-      condition: day['condition']['text'] as String,
-      iconUrl:   'https:${day['condition']['icon']}',
-      humidity:  (day['avghumidity']  as num).toDouble(),
-      windKph:   (day['maxwind_kph']  as num).toDouble(),
-      feelsLike: dayIndex == 0
-          ? (current['feelslike_c'] as num).toDouble()
-          : (day['avgtemp_c']       as num).toDouble(),
-      isDay:     dayIndex == 0 ? (current['is_day'] as int) == 1 : true,
+      date:      forecastDay['date'] as String,
+      avgTemp:   n(day['avgtemp_c']),
+      minTemp:   n(day['mintemp_c']),
+      maxTemp:   n(day['maxtemp_c']),
+      condition: condition['text'] as String,
+      iconUrl:   'https:${condition['icon']}',
+      humidity:  n(day['avghumidity']),
+      windKph:   n(day['maxwind_kph']),
+      feelsLike: dayIndex == 0 ? n(current['feelslike_c']) : n(day['avgtemp_c']),
+      isDay:     dayIndex == 0 ? (current['is_day'] as num) == 1 : true,
     );
   }
 
   /// Suggest AC temperature based on outdoor weather
   /// Returns null if no recommendation needed
-  String? get acRecommendation {
-    if (avgTemp >= 35) return 'It\'s very hot outside. Recommend AC at 22°C.';
-    if (avgTemp >= 28) return 'Warm outside. Recommend AC at 24°C.';
-    if (avgTemp <= 10) return 'Cold outside. Consider heating to 22°C.';
+  AcAdvice? get acRecommendation {
+    if (avgTemp >= 35) return AcAdvice.veryHot;
+    if (avgTemp >= 28) return AcAdvice.warm;
+    if (avgTemp <= 10) return AcAdvice.cold;
     return null;
   }
 

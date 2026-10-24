@@ -115,7 +115,7 @@ class _DeviceGridContent extends StatelessWidget {
         child: ErrorView(
           icon: Icons.wifi_off_rounded,
           title: l10n.noDevices,
-          message: (state as DevicesError).message,
+          message: l10n.errGeneric,
         ),
       );
     }

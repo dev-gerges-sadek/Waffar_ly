@@ -1,4 +1,3 @@
-// ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -19,24 +18,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   List<Map<String, String>> _pages(AppLocalizations l10n) => [
     {
-      'title': l10n.isArabic ? 'تحكّم في أجهزتك بسهولة' : 'Control all your devices',
-      'desc':  l10n.isArabic
-          ? 'أدِر منزلك الذكي بكفاءة من مكان واحد.'
-          : 'Manage your smart home easily and efficiently from one place.',
+      'title': l10n.onboardTitle1,
+      'desc': l10n.onboardDesc1,
       'image': 'assets/images/OnboardingScreen1.png',
     },
     {
-      'title': l10n.isArabic ? 'تصميم جميل وعصري' : 'Beautiful interface',
-      'desc':  l10n.isArabic
-          ? 'تجربة مستخدم مريحة وعصرية مصممة خصيصاً لك.'
-          : 'A comfortable and modern user experience designed for you.',
+      'title': l10n.onboardTitle2,
+      'desc': l10n.onboardDesc2,
       'image': 'assets/images/OnboardingScreen2.png',
     },
     {
-      'title': l10n.isArabic ? 'ابدأ الآن' : 'Get Started',
-      'desc':  l10n.isArabic
-          ? 'ابدأ التحكم في منزلك الآن بمزايا متقدمة.'
-          : 'Start controlling your home now with advanced features.',
+      'title': l10n.onboardTitle3,
+      'desc': l10n.onboardDesc3,
       'image': 'assets/images/OnboardingScreen3.png',
     },
   ];
@@ -85,7 +78,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     MaterialPageRoute(builder: (_) => const SignInScreen()),
                   ),
                   child: Text(
-                    l10n.isArabic ? 'تخطّى' : 'Skip',
+                    l10n.skip,
                     style: TextStyle(fontSize: 14.sp, color: hint),
                   ),
                 ),
@@ -111,12 +104,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             begin: AlignmentDirectional.topStart,
                             end: AlignmentDirectional.bottomEnd,
                             colors: [
-                              primary.withOpacity(0.10),
-                              secondary.withOpacity(0.05),
+                              primary.withValues(alpha: 0.10),
+                              secondary.withValues(alpha: 0.05),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(24.r),
-                          border: Border.all(color: primary.withOpacity(0.20)),
+                          border: Border.all(color: primary.withValues(alpha: 0.20)),
                         ),
                         child: Image.asset(pages[i]['image']!,
                             height: 200.h, fit: BoxFit.contain),
@@ -181,13 +174,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16.r)),
                     elevation: 4,
-                    shadowColor: primary.withOpacity(0.4),
+                    shadowColor: primary.withValues(alpha: 0.4),
                   ),
                   onPressed: () => _next(context),
                   child: Text(
                     _index == pages.length - 1
-                        ? (l10n.isArabic ? 'ابدأ الآن' : 'Get Started')
-                        : (l10n.isArabic ? 'التالي' : 'Next'),
+                        ? l10n.getStarted
+                        : l10n.next,
                     style: TextStyle(
                         fontSize: 16.sp, fontWeight: FontWeight.w600),
                   ),

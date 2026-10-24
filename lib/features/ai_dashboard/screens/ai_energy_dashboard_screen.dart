@@ -23,6 +23,23 @@ class AiEnergyDashboardScreen extends StatelessWidget {
   }
 }
 
+/// Accepts Arabic-Indic digits and the Arabic decimal separator.
+String _normaliseNumber(String raw) {
+  const arabic = '٠١٢٣٤٥٦٧٨٩';
+  final buf = StringBuffer();
+  for (final ch in raw.trim().characters) {
+    final i = arabic.indexOf(ch);
+    if (i >= 0) {
+      buf.write(i);
+    } else if (ch == '٫' || ch == ',' || ch == '،') {
+      buf.write('.');
+    } else {
+      buf.write(ch);
+    }
+  }
+  return buf.toString();
+}
+
 class _DashboardView extends StatelessWidget {
   const _DashboardView();
 
@@ -68,7 +85,7 @@ class _DashboardView extends StatelessWidget {
               ),
             ),
             onPressed: () {
-              final rate = double.tryParse(ctrl.text);
+              final rate = double.tryParse(_normaliseNumber(ctrl.text));
               if (rate != null && rate > 0) {
                 context.read<AiEnergyCubit>().updateRate(rate);
               }
@@ -109,9 +126,13 @@ class _DashboardView extends StatelessWidget {
               primary: primary,
               onRetry: () => context.read<AiEnergyCubit>().startListening(),
             ),
-          AiEnergyLoaded() => DashboardBody(
-              state: state,
-              onRateTap: () => _showRateDialog(context),
+          AiEnergyLoaded() => RefreshIndicator(
+              color: primary,
+              onRefresh: () => context.read<AiEnergyCubit>().refresh(),
+              child: DashboardBody(
+                state: state,
+                onRateTap: () => _showRateDialog(context),
+              ),
             ),
         },
       ),
@@ -119,23 +140,74 @@ class _DashboardView extends StatelessWidget {
   }
 }
 
-class _LoadingShell extends StatelessWidget {
+class _LoadingShell extends StatefulWidget {
   const _LoadingShell({required this.primary});
   final Color primary;
 
   @override
+  State<_LoadingShell> createState() => _LoadingShellState();
+}
+
+class _LoadingShellState extends State<_LoadingShell>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1100),
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(color: primary),
-          SizedBox(height: 16.h),
-          Text(l10n.connectingFirebaseRtdb,
-              style: TextStyle(fontSize: 13.sp, color: SHColors.hint(context)),
-              textAlign: TextAlign.center),
-        ],
+    Widget box(double h) => AnimatedBuilder(
+      animation: _pulse,
+      builder: (_, _) => Container(
+        height: h,
+        decoration: BoxDecoration(
+          color: SHColors.hint(context)
+              .withValues(alpha: 0.08 + 0.10 * _pulse.value),
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+      ),
+    );
+
+    return Semantics(
+      label: l10n.dashLoadingTitle,
+      child: Padding(
+        padding: EdgeInsets.all(16.w),
+        child: Column(
+          children: [
+            box(86.h),
+            SizedBox(height: 20.h),
+            Row(
+              children: [
+                Expanded(child: box(104.h)),
+                SizedBox(width: 10.w),
+                Expanded(child: box(104.h)),
+              ],
+            ),
+            SizedBox(height: 10.h),
+            Row(
+              children: [
+                Expanded(child: box(104.h)),
+                SizedBox(width: 10.w),
+                Expanded(child: box(104.h)),
+              ],
+            ),
+            SizedBox(height: 20.h),
+            box(160.h),
+            SizedBox(height: 16.h),
+            Text(
+              l10n.dashLoadingTitle,
+              style: TextStyle(fontSize: 12.sp, color: SHColors.hint(context)),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -174,9 +246,9 @@ class _ErrorShell extends StatelessWidget {
                     color: SHColors.text(context)),
                 textAlign: TextAlign.center),
             SizedBox(height: 6.h),
-            Text(message,
+            Text(l10n.dashErrorHint,
                 style:
-                    TextStyle(fontSize: 10.sp, color: SHColors.hint(context)),
+                    TextStyle(fontSize: 11.sp, color: SHColors.hint(context)),
                 textAlign: TextAlign.center),
             SizedBox(height: 20.h),
             ElevatedButton.icon(

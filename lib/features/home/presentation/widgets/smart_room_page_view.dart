@@ -1,3 +1,4 @@
+import '../../../../core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/shared/domain/entities/smart_room.dart';
@@ -38,7 +39,7 @@ class SmartRoomsPageView extends StatelessWidget {
         if (state is SmartRoomError) {
           return Center(
             child: Text(
-              state.message,
+              AppLocalizations.of(context).errGeneric,
               style: TextStyle(color: SHColors.hint(context)),
             ),
           );

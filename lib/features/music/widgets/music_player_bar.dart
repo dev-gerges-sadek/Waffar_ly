@@ -1,5 +1,5 @@
-// ignore_for_file: deprecated_member_use
 
+import '../../../core/widgets/tap_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -37,7 +37,7 @@ class MusicPlayerBar extends StatelessWidget {
           decoration: BoxDecoration(
             color: card,
             borderRadius: BorderRadius.circular(16.r),
-            border: Border.all(color: primary.withOpacity(0.3)),
+            border: Border.all(color: primary.withValues(alpha: 0.3)),
             boxShadow: [
               BoxShadow(
                 color: SHColors.shadow(context),
@@ -73,7 +73,7 @@ class MusicPlayerBar extends StatelessWidget {
                   ],
                 ),
               ),
-              GestureDetector(
+              TapButton(
                 onTap: () => cubit.playTrack(track),
                 child: Container(
                   width: 38.w,
@@ -90,7 +90,7 @@ class MusicPlayerBar extends StatelessWidget {
                 ),
               ),
               SizedBox(width: 8.w),
-              GestureDetector(
+              TapButton(
                 onTap: () => cubit.stopPlayback(),
                 child: Icon(Icons.stop_rounded, color: hint, size: 22.sp),
               ),
@@ -121,18 +121,19 @@ class _TrackArt extends StatelessWidget {
           ? Container(
               width: size,
               height: size,
-              color: primary.withOpacity(0.2),
+              color: primary.withValues(alpha: 0.2),
               child: Icon(Icons.music_note, color: primary, size: size * 0.5),
             )
           : Image.network(
               track.artworkUrl,
+              cacheWidth: 240,
               width: size,
               height: size,
               fit: BoxFit.cover,
               errorBuilder: (_, _, _) => Container(
                 width: size,
                 height: size,
-                color: primary.withOpacity(0.2),
+                color: primary.withValues(alpha: 0.2),
                 child: Icon(Icons.music_note, color: primary),
               ),
             ),

@@ -1,4 +1,3 @@
-// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/app_localizations.dart';
@@ -89,7 +88,7 @@ class HomeDrawer extends StatelessWidget {
 
             SizedBox(height: 24.h),
             Divider(
-              color: hintColor.withOpacity(0.15),
+              color: hintColor.withValues(alpha: 0.15),
               indent: 20.w,
               endIndent: 20.w,
             ),
@@ -170,7 +169,7 @@ class HomeDrawer extends StatelessWidget {
             const Spacer(),
 
             Divider(
-              color: hintColor.withOpacity(0.15),
+              color: hintColor.withValues(alpha: 0.15),
               indent: 20.w,
               endIndent: 20.w,
             ),
@@ -223,7 +222,7 @@ class _DrawerTile extends StatelessWidget {
           height: 38.w,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: color.withOpacity(0.12),
+            color: color.withValues(alpha: 0.12),
           ),
           child: Icon(icon, color: color, size: 18.sp),
         ),
@@ -240,7 +239,7 @@ class _DrawerTile extends StatelessWidget {
               ? Icons.arrow_back_ios_rounded
               : Icons.arrow_forward_ios_rounded,
           size: 13,
-          color: color.withOpacity(0.6),
+          color: color.withValues(alpha: 0.6),
         ),
       ),
     );

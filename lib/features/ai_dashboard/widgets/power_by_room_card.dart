@@ -4,7 +4,6 @@
 // High-consumption rooms shift toward red/orange.
 // ============================================================================
 
-// ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -37,7 +36,7 @@ class PowerByRoomCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: SHColors.card(context),
         borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: SHColors.hint(context).withOpacity(0.12)),
+        border: Border.all(color: SHColors.hint(context).withValues(alpha: 0.12)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,7 +61,7 @@ class PowerByRoomCard extends StatelessWidget {
                   vertical: 3.h,
                 ),
                 decoration: BoxDecoration(
-                  color: primary.withOpacity(0.10),
+                  color: primary.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Text(
@@ -137,7 +136,7 @@ class _RoomRow extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: barColor.withOpacity(0.15),
+                  color: barColor.withValues(alpha: 0.15),
                 ),
                 child: Text(
                   '${rank + 1}',
@@ -195,7 +194,7 @@ class _RoomRow extends StatelessWidget {
             child: LinearProgressIndicator(
               value: pct.clamp(0.0, 1.0),
               minHeight: 6.h,
-              backgroundColor: barColor.withOpacity(0.12),
+              backgroundColor: barColor.withValues(alpha: 0.12),
               valueColor: AlwaysStoppedAnimation(barColor),
             ),
           ),
@@ -224,7 +223,7 @@ class _EmptyRooms extends StatelessWidget {
           Icon(Icons.home_outlined, size: 32.sp, color: SHColors.hint(context)),
           SizedBox(height: 8.h),
           Text(
-            l10n.isArabic ? 'لا توجد بيانات للغرف' : 'No room data available',
+            l10n.noRoomData,
             style: TextStyle(fontSize: 12.sp, color: SHColors.hint(context)),
           ),
         ],

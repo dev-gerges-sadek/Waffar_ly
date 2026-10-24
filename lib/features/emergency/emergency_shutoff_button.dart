@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get_it/get_it.dart';
+import 'data/emergency_repository.dart';
 import '../../core/l10n/app_localizations.dart';
 import '../../core/theme/sh_colors.dart';
 import 'cubit/emergency_cubit.dart';
@@ -12,7 +15,7 @@ class EmergencyShutoffButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-        create: (_) => EmergencyCubit(),
+        create: (_) => EmergencyCubit(GetIt.I<EmergencyRepository>()),
         child: const _EmergencyBtn(),
       );
 }
@@ -21,7 +24,7 @@ class _EmergencyBtn extends StatelessWidget {
   const _EmergencyBtn();
 
   Future<void> _confirmAndShutoff(BuildContext context) async {
-    HapticFeedback.heavyImpact();
+    unawaited(HapticFeedback.heavyImpact());
     final l10n     = AppLocalizations.of(context);
     final isDark   = Theme.of(context).brightness == Brightness.dark;
     final errColor = isDark ? SHColors.darkErrorColor : SHColors.lightErrorColor;
@@ -64,9 +67,7 @@ class _EmergencyBtn extends StatelessWidget {
         backgroundColor: warnColor,
         duration: const Duration(seconds: 2),
       ));
-      context.read<EmergencyCubit>().shutoffAll();
-    } else {
-      debugPrint('[EmergencyShutoffButton] User cancelled');
+      unawaited(context.read<EmergencyCubit>().shutoffAll());
     }
   }
 
@@ -82,15 +83,17 @@ class _EmergencyBtn extends StatelessWidget {
       listener: (ctx, state) {
         if (state is EmergencyDone) {
           ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
-            content: Text(state.turnedOffCount > 0
-                ? '✓ ${state.turnedOffCount} ${l10n.devices} ${l10n.powerOff}'
-                : '${l10n.devices} ${l10n.powerOff}'),
-            backgroundColor: successColor,
-            duration: const Duration(seconds: 2),
+            content: Text(!state.hardwareSent
+                ? l10n.emergencyHardwareFailed
+                : state.turnedOffCount > 0
+                    ? '✓ ${l10n.devicesTurnedOff(state.turnedOffCount)}'
+                    : l10n.allAlreadyOff),
+            backgroundColor: state.hardwareSent ? successColor : errColor,
+            duration: Duration(seconds: state.hardwareSent ? 2 : 6),
           ));
         } else if (state is EmergencyError) {
           ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
-            content: Text(state.message),
+            content: Text(l10n.emergencyFailed),
             backgroundColor: errColor,
           ));
         }
@@ -107,7 +110,7 @@ class _EmergencyBtn extends StatelessWidget {
               borderRadius: BorderRadius.circular(14.r),
               boxShadow: [
                 BoxShadow(
-                  color: errColor.withOpacity(0.30),
+                  color: errColor.withValues(alpha: 0.30),
                   blurRadius: 10,
                   offset: const Offset(0, 3),
                 ),

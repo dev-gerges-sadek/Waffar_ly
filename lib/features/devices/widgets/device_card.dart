@@ -1,3 +1,4 @@
+import '../../../core/widgets/tap_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -43,9 +44,9 @@ class _DeviceCardState extends State<DeviceCard> {
     final hwOnline =
         widget.device.hardwareSensor?.status == SensorStatus.online;
     final isPowerOn = widget.device.simulationData?.isOn ?? false;
-    final activeColor = isPowerOn ? primary : hintColor.withOpacity(0.4);
+    final activeColor = isPowerOn ? primary : hintColor.withValues(alpha: 0.4);
 
-    return GestureDetector(
+    return TapButton(
       onTap: () => showDeviceDetailSheet(context, widget.device),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
@@ -56,8 +57,8 @@ class _DeviceCardState extends State<DeviceCard> {
           border: Border.all(
             // SHColors.surface at 0 opacity ≡ transparent — no raw Colors.transparent
             color: isPowerOn
-                ? primary.withOpacity(0.3)
-                : surface.withOpacity(0),
+                ? primary.withValues(alpha: 0.3)
+                : surface.withValues(alpha: 0),
             width: 1.5,
           ),
           boxShadow: [
@@ -84,7 +85,7 @@ class _DeviceCardState extends State<DeviceCard> {
                       duration: const Duration(milliseconds: 300),
                       padding: EdgeInsets.all(8.w),
                       decoration: BoxDecoration(
-                        color: activeColor.withOpacity(0.08),
+                        color: activeColor.withValues(alpha: 0.08),
                         shape: BoxShape.circle,
                       ),
                       child: SizedBox(
@@ -103,7 +104,7 @@ class _DeviceCardState extends State<DeviceCard> {
                       width: 7.w,
                       height: 7.h,
                       decoration: BoxDecoration(
-                        color: hwOnline ? success : errColor.withOpacity(0.5),
+                        color: hwOnline ? success : errColor.withValues(alpha: 0.5),
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -137,7 +138,7 @@ class _DeviceCardState extends State<DeviceCard> {
                         alignment: AlignmentDirectional.centerEnd,
                         child: Switch.adaptive(
                           value: isPowerOn,
-                          activeColor: primary,
+                          activeThumbColor: primary,
                           onChanged: (val) => context
                               .read<DevicesCubit>()
                               .toggleSimulation(widget.device.id, val),
@@ -190,7 +191,7 @@ class _DeviceCardState extends State<DeviceCard> {
                           height: 75.h,
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: hintColor.withOpacity(0.02),
+                            color: hintColor.withValues(alpha: 0.02),
                             borderRadius: BorderRadius.circular(14.r),
                           ),
                           child: Center(
@@ -199,7 +200,7 @@ class _DeviceCardState extends State<DeviceCard> {
                               style: TextStyle(
                                 fontSize: 9.5.sp,
                                 fontWeight: FontWeight.w600,
-                                color: hintColor.withOpacity(0.35),
+                                color: hintColor.withValues(alpha: 0.35),
                               ),
                             ),
                           ),
@@ -219,10 +220,10 @@ class _DeviceCardState extends State<DeviceCard> {
                           height: 75.h,
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: hwColor.withOpacity(0.02),
+                            color: hwColor.withValues(alpha: 0.02),
                             borderRadius: BorderRadius.circular(14.r),
                             border: Border.all(
-                              color: hwColor.withOpacity(0.06),
+                              color: hwColor.withValues(alpha: 0.06),
                               width: 1,
                             ),
                           ),
@@ -232,7 +233,7 @@ class _DeviceCardState extends State<DeviceCard> {
                               Icon(
                                 Icons.cloud_off_rounded,
                                 size: 15.sp,
-                                color: hwColor.withOpacity(0.25),
+                                color: hwColor.withValues(alpha: 0.25),
                               ),
                               SizedBox(width: 6.w),
                               Text(
@@ -240,7 +241,7 @@ class _DeviceCardState extends State<DeviceCard> {
                                 style: TextStyle(
                                   fontSize: 9.sp,
                                   fontWeight: FontWeight.w600,
-                                  color: hwColor.withOpacity(0.3),
+                                  color: hwColor.withValues(alpha: 0.3),
                                 ),
                               ),
                             ],
@@ -257,7 +258,7 @@ class _DeviceCardState extends State<DeviceCard> {
                       Icon(
                         Icons.unfold_more_rounded,
                         size: 11.sp,
-                        color: hintColor.withOpacity(0.4),
+                        color: hintColor.withValues(alpha: 0.4),
                       ),
                       SizedBox(width: 4.w),
                       Text(
@@ -265,7 +266,7 @@ class _DeviceCardState extends State<DeviceCard> {
                         style: TextStyle(
                           fontSize: 8.5.sp,
                           fontWeight: FontWeight.w500,
-                          color: hintColor.withOpacity(0.4),
+                          color: hintColor.withValues(alpha: 0.4),
                         ),
                       ),
                     ],
@@ -299,14 +300,14 @@ class _SourceTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: GestureDetector(
+      child: TapButton(
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
             color: selected
                 ? cardColor
-                : SHColors.surface(context).withOpacity(0),
+                : SHColors.surface(context).withValues(alpha: 0),
             borderRadius: BorderRadius.circular(10.r),
             boxShadow: selected
                 ? [BoxShadow(color: shadow, blurRadius: 3)]
@@ -318,7 +319,7 @@ class _SourceTab extends StatelessWidget {
             style: TextStyle(
               fontSize: 9.sp,
               fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-              color: selected ? color : hintColor.withOpacity(0.6),
+              color: selected ? color : hintColor.withValues(alpha: 0.6),
             ),
           ),
         ),

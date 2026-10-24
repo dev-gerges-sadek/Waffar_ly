@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+import '../../../../core/widgets/tap_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -31,16 +31,16 @@ class HomeInfoRow extends StatelessWidget {
           child: Row(
             children: [
               // Weather chip
-              GestureDetector(
+              TapButton(
                 onTap: onWeatherTap,
                 child: Container(
                   padding:
                       EdgeInsetsDirectional.symmetric(horizontal: 12.w, vertical: 8.h),
                   decoration: BoxDecoration(
-                    color: SHColors.warning(context).withOpacity(0.10),
+                    color: SHColors.warning(context).withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(20.r),
                     border: Border.all(
-                        color: SHColors.warning(context).withOpacity(0.35)),
+                        color: SHColors.warning(context).withValues(alpha: 0.35)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -72,7 +72,7 @@ class HomeInfoRow extends StatelessWidget {
                   color: primary,
                   boxShadow: [
                     BoxShadow(
-                        color: primary.withOpacity(0.45), blurRadius: 6),
+                        color: primary.withValues(alpha: 0.45), blurRadius: 6),
                   ],
                 ),
               ),

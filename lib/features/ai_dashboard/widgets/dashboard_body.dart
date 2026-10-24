@@ -1,3 +1,4 @@
+import '../../../core/widgets/tap_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/app_localizations.dart';
@@ -7,9 +8,9 @@ import 'ai_source_panel.dart';
 import 'anomaly_alert_card.dart';
 import 'dashboard_section_header.dart';
 import 'energy_snapshot_card.dart';
+import 'kpi_grid.dart';
 import 'power_by_room_card.dart';
 import 'section_divider.dart';
-import 'stat_metric.dart';
 import 'system_health_banner.dart';
 import 'top_devices_card.dart';
 
@@ -25,16 +26,23 @@ class DashboardBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n    = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
     final primary = SHColors.primary(context);
-    final hint    = SHColors.hint(context);
+    final hint = SHColors.hint(context);
     // Semantic color tokens — no raw Colors.*
-    final warningColor  = SHColors.warning(context);
-    final purpleAccent  = SHColors.chartBlue(context);   // chart accent for AI section
-    final tealAccent    = SHColors.success(context);     // rooms section accent
-    final goldAccent    = SHColors.rank(context, 1);     // top devices accent (gold)
+    final warningColor = SHColors.warning(context);
+    final purpleAccent = SHColors.chartBlue(
+      context,
+    ); // chart accent for AI section
+    final tealAccent = SHColors.success(context); // rooms section accent
+    final goldAccent = SHColors.rank(context, 1); // top devices accent (gold)
 
-    return SingleChildScrollView(
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 760),
+        child: SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsetsDirectional.fromSTEB(16.w, 16.h, 16.w, 32.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -49,15 +57,15 @@ class DashboardBody extends StatelessWidget {
           ),
           SizedBox(height: 20.h),
 
-          // ── System indicators ────────────────────────────────────────────
+          // ── Key numbers ──────────────────────────────────────────────────
           DashboardSectionHeader(
-            title: l10n.systemIndicatorsTitle,
-            icon: Icons.auto_awesome_rounded,
+            title: l10n.dashSummaryTitle,
+            icon: Icons.dashboard_rounded,
             color: primary,
             subtitle: l10n.firestoreRealtimeSubtitle,
           ),
           SizedBox(height: 10.h),
-          _SystemSummaryCard(state: state, primary: primary, l10n: l10n),
+          DashboardKpiGrid(state: state),
           SizedBox(height: 20.h),
 
           // ── Live energy snapshot ─────────────────────────────────────────
@@ -97,28 +105,28 @@ class DashboardBody extends StatelessWidget {
             SizedBox(height: 14.h),
           ],
 
-          // ── AI analysis ──────────────────────────────────────────────────
-          DashboardSectionHeader(
-            title: l10n.aiAnalysisTitle,
-            icon: Icons.psychology_rounded,
-            color: purpleAccent,
-            subtitle: l10n.simPlusEspSubtitle,
-          ),
-          SizedBox(height: 10.h),
-          AiSourcePanel(
-            simulator: state.simulator,
-            hardware: state.hardware,
-          ),
-          SizedBox(height: 22.h),
-          const SectionDivider(),
-          SizedBox(height: 14.h),
+          // ── AI analysis (only if data is available) ──────────────────────────
+          if (!state.simulator.isIdle || !state.hardware.isIdle) ...[
+            DashboardSectionHeader(
+              title: l10n.aiAnalysisTitle,
+              icon: Icons.psychology_rounded,
+              color: purpleAccent,
+              subtitle: l10n.simPlusEspSubtitle,
+            ),
+            SizedBox(height: 10.h),
+            AiSourcePanel(simulator: state.simulator, hardware: state.hardware),
+            SizedBox(height: 22.h),
+            const SectionDivider(),
+            SizedBox(height: 14.h),
+          ],
 
           // ── Power by room ────────────────────────────────────────────────
           DashboardSectionHeader(
             title: l10n.powerByRoomTitle,
             icon: Icons.home_rounded,
             color: tealAccent,
-            subtitle: '${state.roomBreakdown.length} ${l10n.activeRoomsSubtitle}',
+            subtitle:
+                '${state.roomBreakdown.length} ${l10n.activeRoomsSubtitle}',
           ),
           SizedBox(height: 10.h),
           PowerByRoomCard(
@@ -159,6 +167,8 @@ class DashboardBody extends StatelessWidget {
           ),
         ],
       ),
+        ),
+      ),
     );
   }
 
@@ -166,68 +176,6 @@ class DashboardBody extends StatelessWidget {
       '${dt.hour.toString().padLeft(2, '0')}:'
       '${dt.minute.toString().padLeft(2, '0')}:'
       '${dt.second.toString().padLeft(2, '0')}';
-}
-
-// ── System summary card ───────────────────────────────────────────────────────
-
-class _SystemSummaryCard extends StatelessWidget {
-  const _SystemSummaryCard({
-    required this.state,
-    required this.primary,
-    required this.l10n,
-  });
-
-  final AiEnergyLoaded state;
-  final Color primary;
-  final AppLocalizations l10n;
-
-  @override
-  Widget build(BuildContext context) {
-    final success = SHColors.success(context);
-    return Container(
-      padding: EdgeInsets.all(14.w),
-      decoration: BoxDecoration(
-        color: SHColors.card(context),
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: primary.withOpacity(0.18)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.liveSummaryLabel,
-            style: TextStyle(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w700,
-              color: SHColors.text(context),
-            ),
-          ),
-          SizedBox(height: 10.h),
-          Row(
-            children: [
-              Expanded(
-                child: StatMetric(
-                  icon: Icons.electric_bolt_rounded,
-                  color: primary,
-                  value: '${state.totalLiveWatts.toStringAsFixed(0)} W',
-                  label: l10n.totalConsumptionLabel,
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: StatMetric(
-                  icon: Icons.safety_check_rounded,
-                  color: success,
-                  value: state.systemHealth.label(l10n.isArabic),
-                  label: l10n.systemStatusLabel,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 // ── Rate footer ───────────────────────────────────────────────────────────────
@@ -246,7 +194,7 @@ class RateFooterCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n      = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
     final onPrimary = Theme.of(context).colorScheme.onPrimary;
 
     return Container(
@@ -254,7 +202,7 @@ class RateFooterCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: SHColors.card(context),
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: primary.withOpacity(0.20)),
+        border: Border.all(color: primary.withValues(alpha: 0.20)),
       ),
       child: Row(
         children: [
@@ -264,9 +212,13 @@ class RateFooterCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(l10n.electricityRateLabel,
-                    style: TextStyle(
-                        fontSize: 11.sp, color: SHColors.hint(context))),
+                Text(
+                  l10n.electricityRateLabel,
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    color: SHColors.hint(context),
+                  ),
+                ),
                 Text(
                   '${rate.toStringAsFixed(2)} ${l10n.electricityRateUnit}',
                   style: TextStyle(
@@ -278,11 +230,13 @@ class RateFooterCard extends StatelessWidget {
               ],
             ),
           ),
-          GestureDetector(
+          TapButton(
             onTap: onTap,
             child: Container(
               padding: EdgeInsetsDirectional.symmetric(
-                  horizontal: 10.w, vertical: 6.h),
+                horizontal: 10.w,
+                vertical: 6.h,
+              ),
               decoration: BoxDecoration(
                 color: primary,
                 borderRadius: BorderRadius.circular(8.r),
@@ -290,9 +244,10 @@ class RateFooterCard extends StatelessWidget {
               child: Text(
                 l10n.editLabel,
                 style: TextStyle(
-                    fontSize: 11.sp,
-                    color: onPrimary,
-                    fontWeight: FontWeight.w600),
+                  fontSize: 11.sp,
+                  color: onPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),

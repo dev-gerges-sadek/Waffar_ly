@@ -32,7 +32,7 @@ class _SplashScreenState extends State<SplashScreen>
         duration: const Duration(milliseconds: 2000), vsync: this)
       ..forward();
 
-    Future.delayed(const Duration(seconds: 3), _navigate);
+    Future.delayed(const Duration(milliseconds: 1500), _navigate);
   }
 
   Future<void> _navigate() async {
@@ -70,14 +70,14 @@ class _SplashScreenState extends State<SplashScreen>
 
     final gradientColors = isDark
         ? [
-            SHColors.darkPrimaryColor.withOpacity(0.8),
-            SHColors.darkSecondaryColor.withOpacity(0.9),
-            SHColors.darkAccentColor.withOpacity(0.8),
+            SHColors.darkPrimaryColor.withValues(alpha: 0.8),
+            SHColors.darkSecondaryColor.withValues(alpha: 0.9),
+            SHColors.darkAccentColor.withValues(alpha: 0.8),
           ]
         : [
-            SHColors.lightPrimaryColor.withOpacity(0.8),
-            SHColors.lightSecondaryColor.withOpacity(0.9),
-            SHColors.lightAccentColor.withOpacity(0.8),
+            SHColors.lightPrimaryColor.withValues(alpha: 0.8),
+            SHColors.lightSecondaryColor.withValues(alpha: 0.9),
+            SHColors.lightAccentColor.withValues(alpha: 0.8),
           ];
 
     return Scaffold(
@@ -106,11 +106,11 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Container(
                     padding: EdgeInsets.all(20.w),
                     decoration: BoxDecoration(
-                      color: cardBg.withOpacity(0.95),
+                      color: cardBg.withValues(alpha: 0.95),
                       borderRadius: BorderRadius.circular(30.r),
                       boxShadow: [
                         BoxShadow(
-                          color: SHColors.text(context).withOpacity(0.15),
+                          color: SHColors.text(context).withValues(alpha: 0.15),
                           blurRadius: 30,
                           offset: const Offset(0, 10),
                         ),
@@ -154,7 +154,7 @@ class _SplashScreenState extends State<SplashScreen>
                   l10n.smartAssist,
                   style: TextStyle(
                     fontSize: 14.sp,
-                    color: onPrimary.withOpacity(0.85),
+                    color: onPrimary.withValues(alpha: 0.85),
                     letterSpacing: 0.5,
                   ),
                 ),

@@ -1,4 +1,3 @@
-// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -150,7 +149,7 @@ class _RoomList extends StatelessWidget {
       controller: scroll,
       itemCount: filtered.length,
       separatorBuilder: (_, _) =>
-          Divider(color: hintColor.withOpacity(0.15), height: 1),
+          Divider(color: hintColor.withValues(alpha: 0.15), height: 1),
       itemBuilder: (_, i) => _RoomTile(
         room: filtered[i],
         textColor: textColor,
@@ -173,7 +172,7 @@ class _Handle extends StatelessWidget {
       width: 40.w,
       height: 4.h,
       decoration: BoxDecoration(
-        color: hintColor.withOpacity(0.3),
+        color: hintColor.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(2.r),
       ),
     ),
@@ -250,13 +249,14 @@ class _RoomTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(10.r),
         child: Image.asset(
           room.imageUrl,
+          cacheWidth: 200,
           width: 52.w,
           height: 52.w,
           fit: BoxFit.cover,
           errorBuilder: (_, _, _) => Container(
             width: 52.w,
             height: 52.w,
-            color: primary.withOpacity(0.2),
+            color: primary.withValues(alpha: 0.2),
             child: Icon(Icons.home, color: primary),
           ),
         ),

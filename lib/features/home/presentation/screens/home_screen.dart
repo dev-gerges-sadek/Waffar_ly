@@ -5,6 +5,7 @@ import 'package:get_it/get_it.dart';
 import '../../../../core/core.dart';
 import '../../../../features/smart_room/cubit/smart_room_cubit.dart';
 import '../../../weather/cubit/weather_cubit.dart';
+import '../../../weather/data/weather_repository.dart';
 import '../../../weather/screens/weather_screen.dart';
 import '../../presentation/screens/settings_screen.dart';
 import '../widgets/home_drawer.dart';
@@ -55,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => WeatherCubit()),
+        BlocProvider(create: (_) => WeatherCubit(GetIt.I<WeatherRepository>())),
         // SmartRoomCubit is shared by PageView + PageIndicators
         BlocProvider(
           create: (_) => GetIt.I<SmartRoomCubit>()..loadRooms(),

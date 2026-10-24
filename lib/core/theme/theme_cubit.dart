@@ -3,26 +3,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/app_constants.dart';
 
-/// Replaces ThemeProvider (ChangeNotifier) — pure Cubit, no Provider dependency.
+/// Pure Cubit theme controller (the old ThemeProvider has been removed).
 class ThemeCubit extends Cubit<ThemeMode> {
-  ThemeCubit() : super(ThemeMode.light) {
-    _loadSavedTheme();
-  }
+  ThemeCubit([super.initialState = ThemeMode.light]);
 
-  Future<void> _loadSavedTheme() async {
+  /// Reads the saved theme BEFORE runApp so there is no light->dark flash.
+  static Future<ThemeCubit> restore() async {
     final prefs = await SharedPreferences.getInstance();
     final isDark = prefs.getBool(AppConstants.keyDarkMode) ?? false;
-    emit(isDark ? ThemeMode.dark : ThemeMode.light);
+    return ThemeCubit(isDark ? ThemeMode.dark : ThemeMode.light);
   }
 
   bool get isDark => state == ThemeMode.dark;
 
-  Future<void> toggleTheme() async {
-    final next = isDark ? ThemeMode.light : ThemeMode.dark;
-    emit(next);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(AppConstants.keyDarkMode, next == ThemeMode.dark);
-  }
+  Future<void> toggleTheme() => setDarkMode(!isDark);
 
   Future<void> setDarkMode(bool value) async {
     final next = value ? ThemeMode.dark : ThemeMode.light;

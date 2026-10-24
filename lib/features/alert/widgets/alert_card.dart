@@ -31,10 +31,10 @@ class AlertCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: SHColors.card(context),
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: severityColor.withOpacity(0.40)),
+        border: Border.all(color: severityColor.withValues(alpha: 0.40)),
         boxShadow: [
           BoxShadow(
-            color: severityColor.withOpacity(isDark ? 0.15 : 0.08),
+            color: severityColor.withValues(alpha: isDark ? 0.15 : 0.08),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -52,7 +52,7 @@ class AlertCard extends StatelessWidget {
                   vertical: 3.h,
                 ),
                 decoration: BoxDecoration(
-                  color: severityColor.withOpacity(0.15),
+                  color: severityColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(6.r),
                 ),
                 child: Text(
@@ -150,7 +150,7 @@ class _StatChip extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: EdgeInsetsDirectional.symmetric(horizontal: 8.w, vertical: 4.h),
     decoration: BoxDecoration(
-      color: color.withOpacity(0.10),
+      color: color.withValues(alpha: 0.10),
       borderRadius: BorderRadius.circular(8.r),
     ),
     child: Column(

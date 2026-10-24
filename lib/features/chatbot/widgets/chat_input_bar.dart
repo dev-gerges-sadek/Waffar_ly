@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/constants/app_constants.dart';
+import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/theme/sh_colors.dart';
 
 /// Bottom input bar with RTL-aware send button.
@@ -36,7 +38,7 @@ class ChatInputBar extends StatelessWidget {
         color: cardColor,
         border: Border(
           top: BorderSide(
-            color: hintColor.withOpacity(0.15),
+            color: hintColor.withValues(alpha: 0.15),
             width: 0.5,
           ),
         ),
@@ -48,6 +50,8 @@ class ChatInputBar extends StatelessWidget {
               controller: controller,
               onSubmitted: (_) => onSend(),
               maxLines: 3,
+              maxLength: AppConstants.chatMaxInputChars,
+              buildCounter: (_, {required currentLength, required isFocused, maxLength}) => null,
               minLines: 1,
               textInputAction: TextInputAction.send,
               style: TextStyle(fontSize: 13.sp, color: textColor),
@@ -68,23 +72,24 @@ class ChatInputBar extends StatelessWidget {
             ),
           ),
           SizedBox(width: 8.w),
-          GestureDetector(
+          Semantics(
+            button: true,
+            label: AppLocalizations.of(context).send,
+            child: GestureDetector(
             onTap: onSend,
             child: Container(
-              padding: EdgeInsets.all(10.w),
+              padding: EdgeInsets.all(12.w),
               decoration: BoxDecoration(
                 color: primary,
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                // Mirror send icon for RTL
-                Directionality.of(context) == TextDirection.rtl
-                    ? Icons.send_rounded
-                    : Icons.send_rounded,
+                Icons.send_rounded,
                 color: onPrimary,
                 size: 20,
               ),
             ),
+          ),
           ),
         ],
       ),

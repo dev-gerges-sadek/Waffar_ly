@@ -6,6 +6,7 @@
 // These are extracted from AiEnergyCubit to enable reuse and testing.
 // ============================================================================
 
+import '../../../core/helper/safe_json.dart';
 import '../../../core/constants/app_constants.dart';
 import '../cubit/ai_energy_state.dart';
 import '../models/ai_result.dart';
@@ -23,10 +24,10 @@ class AiUtilities {
   /// - Corrects false anomaly classifications when probability is low
   /// - Recomputes severity from live readings for accuracy
   static AiResult sanitise(Map<String, dynamic> data, String src) {
-    final watts = (data['watts'] as num?)?.toDouble() ?? 0;
-    final amperes = (data['amperes'] as num?)?.toDouble() ?? 0;
-    final kwh = (data['kwh_consumed'] as num?)?.toDouble() ?? 0;
-    final voltage = (data['voltage'] as num?)?.toDouble() ?? 0;
+    final watts = asDouble(data['watts']) ?? 0;
+    final amperes = asDouble(data['amperes']) ?? 0;
+    final kwh = asDouble(data['kwh_consumed']) ?? 0;
+    final voltage = asDouble(data['voltage']) ?? 0;
 
     // All readings zero → idle
     if (watts == 0 && amperes == 0 && kwh == 0) return AiResult.idle(src);

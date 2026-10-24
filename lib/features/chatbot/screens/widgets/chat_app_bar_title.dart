@@ -30,7 +30,7 @@ class ChatAppBarTitle extends StatelessWidget {
           height: 36.w,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: primary.withOpacity(0.15),
+            color: primary.withValues(alpha: 0.15),
           ),
           child: Icon(Icons.smart_toy_rounded, color: primary, size: 20),
         ),

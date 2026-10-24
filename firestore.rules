@@ -1,0 +1,92 @@
+rules_version = '2';
+
+// Waffar - Firestore security rules (multi-tenant).
+//
+// Every household's data lives under  homes/{homeId}/...  A user can touch a
+// home only if they are its owner (homeId == uid) or listed in `members`.
+// Telemetry / AI output collections are read-only for clients: they are
+// written by the backend or the ESP32 gateway through the Admin SDK, which
+// bypasses these rules.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function onlyKeys(allowed) {
+      return request.resource.data.diff(resource == null
+          ? {} : resource.data).affectedKeys().hasOnly(allowed);
+    }
+
+    // -- User profile: owner only ------------------------------------------
+    match /users/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow create, update: if signedIn() && request.auth.uid == uid
+          && request.resource.data.keys().hasOnly(['name', 'email'])
+          && request.resource.data.name is string
+          && request.resource.data.name.size() <= 80
+          && request.resource.data.email is string
+          && request.resource.data.email == request.auth.token.email;
+      allow delete: if false;
+    }
+
+    // -- A household -------------------------------------------------------
+    match /homes/{homeId} {
+
+      function isOwner() {
+        return signedIn() && request.auth.uid == homeId;
+      }
+
+      function isMember() {
+        return isOwner()
+            || (signedIn() && request.auth.uid in
+                get(/databases/$(database)/documents/homes/$(homeId)).data.members);
+      }
+
+      allow read: if isMember();
+      allow create: if isOwner()
+          && request.resource.data.keys().hasOnly(['owner', 'members', 'created_at'])
+          && request.resource.data.owner == homeId
+          && request.resource.data.members == [homeId];
+      allow update: if isOwner()
+          && request.resource.data.owner == resource.data.owner;
+      allow delete: if false;
+
+      // Controllable device state (simulation + app-driven commands).
+      match /device_states/{deviceId} {
+        allow read: if isMember();
+        allow create, update: if isMember()
+            && onlyKeys(['status', 'pending_command', 'command_timestamp',
+                         'command_source', 'last_updated', 'temperature',
+                         'mode', 'fan_speed', 'intensity'])
+            && (!('status' in request.resource.data)
+                || request.resource.data.status in ['ON', 'OFF'])
+            && (!('pending_command' in request.resource.data)
+                || request.resource.data.pending_command in ['ON', 'OFF']);
+        allow delete: if false;
+      }
+
+      // Relay control for the physical device (picked up by the ESP32).
+      match /Control/{deviceId} {
+        allow read: if isMember();
+        allow create, update: if isMember()
+            && onlyKeys(['relayState', 'status', 'shutdown', 'last_updated',
+                         'timestamp', 'device']);
+        allow delete: if false;
+      }
+
+      // Read-only for clients: written by the backend / device gateway.
+      match /Devices/{docId}        { allow read: if isMember(); allow write: if false; }
+      match /ai_results/{docId}     { allow read: if isMember(); allow write: if false; }
+      match /device_history/{docId} { allow read: if isMember(); allow write: if false; }
+      match /device_alerts/{docId}  { allow read: if isMember(); allow write: if false; }
+      match /energy_daily/{docId}   { allow read: if isMember(); allow write: if false; }
+    }
+
+    // -- Everything else (including the old global collections) is denied --
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -5,7 +5,11 @@
 // Firestore path: ai_results/{simulator | hardware | Real_Device_01}
 // ============================================================================
 
+import '../../../core/helper/safe_json.dart';
+import '../../../core/l10n/app_localizations.dart';
+
 /// Severity levels derived from AI decision and anomaly probability.
+
 enum AiSeverity { normal, warning, danger, critical }
 
 extension AiSeverityX on AiSeverity {
@@ -58,57 +62,23 @@ extension AiSeverityX on AiSeverity {
     }
   }
 
-  /// Locale-aware human label.
-  String localLabel(bool isArabic) {
-    if (isArabic) {
-      switch (this) {
-        case AiSeverity.normal:
-          return 'طبيعي';
-        case AiSeverity.warning:
-          return 'تحذير';
-        case AiSeverity.danger:
-          return 'خطر';
-        case AiSeverity.critical:
-          return 'حرج';
-      }
-    }
-    switch (this) {
-      case AiSeverity.normal:
-        return 'Normal';
-      case AiSeverity.warning:
-        return 'Warning';
-      case AiSeverity.danger:
-        return 'Danger';
-      case AiSeverity.critical:
-        return 'Critical';
-    }
-  }
+  /// Locale-aware human label (text lives in the ARB files).
+  String localLabel(AppLocalizations l) => switch (this) {
+    AiSeverity.normal => l.sevNormal,
+    AiSeverity.warning => l.sevWarning,
+    AiSeverity.danger => l.sevDanger,
+    AiSeverity.critical => l.sevCritical,
+  };
 
-  /// Returns a human-readable recommendation string (locale-aware).
-  String recommendation(bool isArabic, double watts, double amps) {
-    if (isArabic) {
+  /// Human-readable recommendation (locale-aware).
+  String recommendation(AppLocalizations l, double watts, double amps) =>
       switch (this) {
-        case AiSeverity.normal:
-          return '✅ النظام يعمل بشكل طبيعي. الاستهلاك ضمن الحدود الآمنة.';
-        case AiSeverity.warning:
-          return '⚠️ تحذير — استهلاك مرتفع (${watts.toStringAsFixed(0)} واط). تابع أجهزتك.';
-        case AiSeverity.danger:
-          return '🚨 خطر — حمل عالٍ (${watts.toStringAsFixed(0)} واط / ${amps.toStringAsFixed(1)} أمبير). أوقف الأجهزة غير الضرورية.';
-        case AiSeverity.critical:
-          return '☠️ حرج — حمل خطير جداً (${watts.toStringAsFixed(0)} واط). افصل الأجهزة فوراً!';
-      }
-    }
-    switch (this) {
-      case AiSeverity.normal:
-        return '✅ System operating normally. Power consumption is within safe range.';
-      case AiSeverity.warning:
-        return '⚠️ WARNING — Elevated consumption (${watts.toStringAsFixed(0)}W). Monitor your devices.';
-      case AiSeverity.danger:
-        return '🚨 DANGER — High load detected (${watts.toStringAsFixed(0)}W / ${amps.toStringAsFixed(1)}A). Turn off non-essential devices.';
-      case AiSeverity.critical:
-        return '☠️ CRITICAL — Extremely unsafe load (${watts.toStringAsFixed(0)}W). Disconnect devices immediately!';
-    }
-  }
+        AiSeverity.normal => l.recNormal,
+        AiSeverity.warning => l.recWarning(watts.toStringAsFixed(0)),
+        AiSeverity.danger =>
+          l.recDanger(watts.toStringAsFixed(0), amps.toStringAsFixed(1)),
+        AiSeverity.critical => l.recCritical(watts.toStringAsFixed(0)),
+      };
 }
 
 // ── Model ─────────────────────────────────────────────────────────────────────
@@ -165,11 +135,11 @@ class AiResult {
   // ── Firestore factory ──────────────────────────────────────────────────────
 
   factory AiResult.fromFirestore(Map<String, dynamic> d, String src) {
-    final probAnomaly = (d['prob_anomaly_pct'] as num?)?.toInt() ?? 0;
-    final probNormal = (d['prob_normal_pct'] as num?)?.toInt() ?? 100;
+    final probAnomaly = asInt(d['prob_anomaly_pct']) ?? 0;
+    final probNormal = asInt(d['prob_normal_pct']) ?? 100;
 
     // Strip emojis and non-word chars from decision string
-    final decision = (d['ai_decision'] as String? ?? 'NORMAL')
+    final decision = (asString(d['ai_decision']) ?? 'NORMAL')
         .replaceAll(RegExp(r'[^\w]'), '')
         .toUpperCase()
         .trim();
@@ -177,23 +147,23 @@ class AiResult {
     return AiResult(
       source: src,
       aiDecision: decision,
-      isAnomaly: d['is_anomaly'] as bool? ?? false,
+      isAnomaly: asBool(d['is_anomaly']) ?? false,
       probAnomalyPct: probAnomaly,
       probNormalPct: probNormal,
-      recommendation: d['recommendation'] as String? ?? '',
+      recommendation: asString(d['recommendation']) ?? '',
       severity: AiSeverityX.fromDecision(decision, probAnomaly),
-      amperes: (d['amperes'] as num?)?.toDouble() ?? 0,
-      watts: (d['watts'] as num?)?.toDouble() ?? 0,
-      voltage: (d['voltage'] as num?)?.toDouble() ?? 0,
-      kwhConsumed: (d['kwh_consumed'] as num?)?.toDouble() ?? 0,
-      costPerKwhEgp: (d['cost_per_kwh_egp'] as num?)?.toDouble() ?? 1.25,
-      costSoFarEgp: (d['cost_so_far_egp'] as num?)?.toDouble() ?? 0,
+      amperes: asDouble(d['amperes']) ?? 0,
+      watts: asDouble(d['watts']) ?? 0,
+      voltage: asDouble(d['voltage']) ?? 0,
+      kwhConsumed: asDouble(d['kwh_consumed']) ?? 0,
+      costPerKwhEgp: asDouble(d['cost_per_kwh_egp']) ?? 1.25,
+      costSoFarEgp: asDouble(d['cost_so_far_egp']) ?? 0,
       predictedMonthlyEgp:
-          (d['predicted_monthly_egp'] as num?)?.toDouble() ?? 0,
-      humidityPct: (d['humidity_pct'] as num?)?.toDouble() ?? 0,
-      temperatureC: (d['temperature_c'] as num?)?.toDouble() ?? 0,
-      uptimeHours: (d['uptime_hours'] as num?)?.toDouble() ?? 0,
-      lastUpdate: d['last_update'] as String? ?? '',
+          asDouble(d['predicted_monthly_egp']) ?? 0,
+      humidityPct: asDouble(d['humidity_pct']) ?? 0,
+      temperatureC: asDouble(d['temperature_c']) ?? 0,
+      uptimeHours: asDouble(d['uptime_hours']) ?? 0,
+      lastUpdate: asString(d['last_update']) ?? '',
     );
   }
 

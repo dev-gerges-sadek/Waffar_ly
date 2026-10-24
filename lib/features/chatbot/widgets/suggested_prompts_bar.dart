@@ -1,3 +1,4 @@
+import '../../../core/widgets/tap_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/app_localizations.dart';
@@ -10,35 +11,14 @@ class SuggestedPromptsBar extends StatelessWidget {
 
   final void Function(String prompt) onTap;
 
-  // ── Prompt lists keyed to locale ─────────────────────────────────────────
-
-  static const _promptsEn = [
-    'What is the current AI status?',
-    'Which device uses the most power?',
-    'What is my current electricity bill?',
-    'Is there an anomaly detected?',
-    'What is the live wattage right now?',
-    'Should I turn off the AC?',
-    'Explain the CRITICAL warning',
-    'How much will I pay this month?',
-  ];
-
-  static const _promptsAr = [
-    'ما حالة الذكاء الاصطناعي الحالية؟',
-    'أي جهاز يستهلك أكثر طاقة؟',
-    'ما فاتورة الكهرباء الحالية؟',
-    'هل تم اكتشاف خلل؟',
-    'كم الواط المباشر الآن؟',
-    'هل يجب إيقاف التكييف؟',
-    'اشرح التحذير الحرج',
-    'كم سأدفع هذا الشهر؟',
-  ];
-
   @override
   Widget build(BuildContext context) {
     final primary = SHColors.primary(context);
     final l10n    = AppLocalizations.of(context);
-    final prompts = l10n.isArabic ? _promptsAr : _promptsEn;
+    final prompts = [
+      l10n.prompt1, l10n.prompt2, l10n.prompt3, l10n.prompt4,
+      l10n.prompt5, l10n.prompt6, l10n.prompt7, l10n.prompt8,
+    ];
 
     return SizedBox(
       height: 40.h,
@@ -69,12 +49,12 @@ class _PromptChip extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
+  Widget build(BuildContext context) => TapButton(
         onTap: onTap,
         child: Container(
           padding: EdgeInsetsDirectional.symmetric(horizontal: 12.w),
           decoration: BoxDecoration(
-            border: Border.all(color: primary.withOpacity(0.40)),
+            border: Border.all(color: primary.withValues(alpha: 0.40)),
             borderRadius: BorderRadius.circular(20.r),
           ),
           alignment: Alignment.center,

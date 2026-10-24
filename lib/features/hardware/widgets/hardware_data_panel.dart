@@ -1,8 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get_it/get_it.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/theme/sh_colors.dart';
+import '../data/hardware_repository.dart';
 
 class HardwareDataPanel extends StatefulWidget {
   const HardwareDataPanel({
@@ -19,7 +20,7 @@ class HardwareDataPanel extends StatefulWidget {
 }
 
 class _HardwareDataPanelState extends State<HardwareDataPanel> {
-  late Stream<DocumentSnapshot> _stream;
+  late Stream<Map<String, dynamic>?> _stream;
 
   @override
   void initState() {
@@ -27,10 +28,8 @@ class _HardwareDataPanelState extends State<HardwareDataPanel> {
     _stream = _buildStream();
   }
 
-  Stream<DocumentSnapshot> _buildStream() => FirebaseFirestore.instance
-      .collection('ai_results')
-      .doc(widget.deviceId)
-      .snapshots();
+  Stream<Map<String, dynamic>?> _buildStream() =>
+      GetIt.I<HardwareRepository>().watchAiResult(widget.deviceId);
 
   void _refresh() => setState(() => _stream = _buildStream());
 
@@ -40,7 +39,7 @@ class _HardwareDataPanelState extends State<HardwareDataPanel> {
     final primary = SHColors.primary(context);
     final hint    = SHColors.hint(context);
 
-    return StreamBuilder<DocumentSnapshot>(
+    return StreamBuilder<Map<String, dynamic>?>(
       stream: _stream,
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
@@ -50,12 +49,12 @@ class _HardwareDataPanelState extends State<HardwareDataPanel> {
           return _StatusCard(
             icon: Icons.error_outline,
             color: SHColors.error(context),
-            message: '${l10n.error}${snap.error}',
+            message: l10n.errGeneric,
             buttonLabel: l10n.retry,
             onTap: _refresh,
           );
         }
-        if (!snap.hasData || !snap.data!.exists) {
+        if (snap.data == null) {
           return _StatusCard(
             icon: Icons.cloud_off_rounded,
             color: hint,
@@ -65,7 +64,7 @@ class _HardwareDataPanelState extends State<HardwareDataPanel> {
           );
         }
 
-        final data = snap.data!.data() as Map<String, dynamic>;
+        final data = snap.data!;
         widget.onDataLoaded?.call(data);
 
         return _DataPanel(data: data, onRefresh: _refresh);
@@ -98,9 +97,9 @@ class _DataPanel extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: primary.withOpacity(0.05),
+        color: primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: primary.withOpacity(0.2)),
+        border: Border.all(color: primary.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,7 +151,7 @@ class _DataPanel extends StatelessWidget {
               '${(data['cost_so_far_egp'] as num?)?.toStringAsFixed(2) ?? "0"} EGP',
               success, hintColor),
           SizedBox(height: 12.h),
-          Divider(color: hintColor.withOpacity(0.2)),
+          Divider(color: hintColor.withValues(alpha: 0.2)),
           SizedBox(height: 12.h),
 
           // ── AI analysis ────────────────────────────────────────────
@@ -184,7 +183,7 @@ class _DataPanel extends StatelessWidget {
             hintColor,
           ),
           SizedBox(height: 12.h),
-          Divider(color: hintColor.withOpacity(0.2)),
+          Divider(color: hintColor.withValues(alpha: 0.2)),
           SizedBox(height: 12.h),
 
           // ── Environment ────────────────────────────────────────────
@@ -299,7 +298,7 @@ class _DecisionBadge extends StatelessWidget {
         padding: EdgeInsetsDirectional.symmetric(
             horizontal: 12.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.15),
+          color: color.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(8.r),
           border: Border.all(color: color, width: 1.5),
         ),
@@ -330,9 +329,9 @@ class _StatusCard extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         padding: EdgeInsets.all(20.w),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.07),
+          color: color.withValues(alpha: 0.07),
           borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: color.withOpacity(0.25)),
+          border: Border.all(color: color.withValues(alpha: 0.25)),
         ),
         child: Column(
           children: [

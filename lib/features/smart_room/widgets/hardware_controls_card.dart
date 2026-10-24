@@ -1,4 +1,3 @@
-// ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -41,10 +40,10 @@ class HardwareControlsCard extends StatelessWidget {
                       vertical: 8.h,
                     ),
                     decoration: BoxDecoration(
-                      color: hintColor.withOpacity(0.15),
+                      color: hintColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8.r),
                       border: Border.all(
-                        color: hintColor.withOpacity(0.2),
+                        color: hintColor.withValues(alpha: 0.2),
                         width: 1.5,
                       ),
                     ),
@@ -53,14 +52,14 @@ class HardwareControlsCard extends StatelessWidget {
                       children: [
                         Icon(SHIcons.fan,
                             size: 14.sp,
-                            color: hintColor.withOpacity(0.6)),
+                            color: hintColor.withValues(alpha: 0.6)),
                         SizedBox(width: 6.w),
                         Text(
                           l10n.powerOff,
                           style: TextStyle(
                             fontSize: 11.sp,
                             fontWeight: FontWeight.w600,
-                            color: hintColor.withOpacity(0.6),
+                            color: hintColor.withValues(alpha: 0.6),
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -74,7 +73,7 @@ class HardwareControlsCard extends StatelessWidget {
                       vertical: 6.h,
                     ),
                     decoration: BoxDecoration(
-                      color: hintColor.withOpacity(0.1),
+                      color: hintColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(6.r),
                     ),
                     child: Text(
@@ -82,7 +81,7 @@ class HardwareControlsCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 10.sp,
                         fontWeight: FontWeight.w600,
-                        color: hintColor.withOpacity(0.5),
+                        color: hintColor.withValues(alpha: 0.5),
                         letterSpacing: 0.3,
                       ),
                     ),
@@ -97,14 +96,14 @@ class HardwareControlsCard extends StatelessWidget {
               vertical: 10.h,
             ),
             decoration: BoxDecoration(
-              color: hintColor.withOpacity(0.08),
+              color: hintColor.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(8.r),
-              border: Border.all(color: hintColor.withOpacity(0.15)),
+              border: Border.all(color: hintColor.withValues(alpha: 0.15)),
             ),
             child: Row(
               children: [
                 Icon(Icons.info_outline,
-                    size: 16.sp, color: hintColor.withOpacity(0.6)),
+                    size: 16.sp, color: hintColor.withValues(alpha: 0.6)),
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
@@ -112,7 +111,7 @@ class HardwareControlsCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w500,
-                      color: hintColor.withOpacity(0.6),
+                      color: hintColor.withValues(alpha: 0.6),
                       height: 1.3,
                     ),
                   ),

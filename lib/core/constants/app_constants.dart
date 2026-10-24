@@ -4,6 +4,7 @@ abstract class AppConstants {
   static const String colDeviceStates = 'device_states';
   static const String colDeviceCommands = 'device_commands';
   static const String colDeviceControl = 'Control';
+  static const String colHardwareDevices = 'Devices';
   static const String colUsers = 'users';
   static const String colDeviceHistory = 'device_history';
   static const String colAnomalyAlerts = 'device_alerts';
@@ -22,18 +23,35 @@ abstract class AppConstants {
   static const String keyElectricityRate = 'electricity_rate_per_kwh';
 
   // ── Weather API ───────────────────────────────────────────────────────────
-  static const String weatherApiKey = 'c9ff61e482ca4f27984155623241010';
+  // Injected at build time:  --dart-define=WEATHER_API_KEY=xxxx
+  // (or --dart-define-from-file=env.json). NEVER commit real keys.
+  // NOTE: anything compiled into the app can be extracted from the binary —
+  // for production, route these calls through a backend / Cloud Function.
+  static const String weatherApiKey = String.fromEnvironment('WEATHER_API_KEY');
   static const String weatherBaseUrl = 'https://api.weatherapi.com/v1';
 
-  // ── Groq API (Free — https://console.groq.com) ────────────────────────────
-  static const String groqApiKey = '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';
+  // ── Groq API (https://console.groq.com) ───────────────────────────────────
+  // Injected at build time:  --dart-define=GROQ_API_KEY=xxxx
+  static const String groqApiKey = String.fromEnvironment('GROQ_API_KEY');
   static const String groqModel = 'llama-3.3-70b-versatile';
 
-  // ── OpenAI API ────────────────────────────────────────────────────────────
-  static const String openAiApiKey = String.fromEnvironment(
-    'OPENAI_API_KEY',
-    defaultValue: 'YOUR_OPENAI_API_KEY',
-  );
+  // ── Data layout ───────────────────────────────────────────────────────────
+  // false (default): classic global collections - works with the existing
+  //                  ESP32 / AI service without any migration.
+  // true:            per-household paths homes/{uid}/... (see README).
+  //   --dart-define=HOME_SCOPED=true
+  static const bool useHomeScope = bool.fromEnvironment('HOME_SCOPED');
+
+  // ── Backend proxy ─────────────────────────────────────────────────────────
+  // When true, Groq + WeatherAPI are called through the Cloud Functions in
+  // /functions (API keys never ship inside the app).
+  //   --dart-define=USE_BACKEND_PROXY=true
+  static const String functionsRegion = 'europe-west1';
+  static const bool useBackendProxy = bool.fromEnvironment('USE_BACKEND_PROXY');
+
+  // ── Chatbot limits ────────────────────────────────────────────────────────
+  static const int chatMaxInputChars = 500;
+  static const int chatMaxHistoryTurns = 10;
 
   // ── Deezer API (FREE — no key required) ───────────────────────────────────
   static const String deezerBaseUrl = 'https://api.deezer.com';

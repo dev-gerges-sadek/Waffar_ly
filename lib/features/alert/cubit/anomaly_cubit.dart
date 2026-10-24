@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../data/repositories/anomaly_repository.dart';
+import '../data/models/anomaly_model.dart';
 import 'anomaly_states.dart';
 
 class AnomalyCubit extends Cubit<AnomalyState> {
   AnomalyCubit(this._repository) : super(AnomalyInitial());
 
   final AnomalyRepository _repository;
-  StreamSubscription? _sub;
+  StreamSubscription<List<AnomalyResult>>? _sub;
 
   void startMonitoring() {
     emit(AnomalyLoading());
@@ -37,7 +38,7 @@ class AnomalyCubit extends Cubit<AnomalyState> {
         }
       },
       onError: (e) {
-        if (!isClosed) emit(AnomalyError(e.toString()));
+        if (!isClosed) emit(AnomalyError('stream_error'));
       },
     );
   }

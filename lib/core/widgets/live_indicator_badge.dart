@@ -22,7 +22,7 @@ class LiveIndicatorBadge extends StatelessWidget {
         vertical: 4.h,
       ),
       decoration: BoxDecoration(
-        color: success.withOpacity(0.15),
+        color: success.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20.r),
       ),
       child: Row(

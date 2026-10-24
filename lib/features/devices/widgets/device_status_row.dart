@@ -20,7 +20,7 @@ class DeviceStatusRow extends StatelessWidget {
     final data    = device.simulationData;
     final isOn    = device.isOn;
     final success = SHColors.success(context);
-    final dot     = isOn ? success : hintColor.withOpacity(0.4);
+    final dot     = isOn ? success : hintColor.withValues(alpha: 0.4);
 
     return Row(
       children: [

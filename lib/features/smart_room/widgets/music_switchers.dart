@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+import '../../../core/widgets/tap_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_it/get_it.dart';
@@ -71,12 +71,12 @@ class _MusicSwitchersState extends State<MusicSwitchers> {
                       ),
                     ),
                     const Spacer(),
-                    GestureDetector(
+                    TapButton(
                       onTap: _openMusicScreen,
                       child: Container(
                         padding: EdgeInsets.all(4.w),
                         decoration: BoxDecoration(
-                          color: primary.withOpacity(0.10),
+                          color: primary.withValues(alpha: 0.10),
                           borderRadius: BorderRadius.circular(6.r),
                         ),
                         child: Icon(
@@ -99,7 +99,7 @@ class _MusicSwitchersState extends State<MusicSwitchers> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                GestureDetector(
+                TapButton(
                   onTap: _openMusicScreen,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -185,7 +185,7 @@ class _MusicBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return TapButton(
       onTap: enabled ? onTap : null,
       child: Icon(icon, color: enabled ? primary : hint, size: size),
     );

@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+import '../../../../core/widgets/tap_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -185,7 +185,7 @@ class SettingsScreen extends StatelessWidget {
                       final isLoading = state is LoginLoadingState;
                       final isRtl     = Directionality.of(context) ==
                           TextDirection.rtl;
-                      return GestureDetector(
+                      return TapButton(
                         onTap: isLoading
                             ? null
                             : () => context.read<AuthCubit>().signOut(),
@@ -194,7 +194,7 @@ class SettingsScreen extends StatelessWidget {
                             Container(
                               padding: EdgeInsets.all(8.w),
                               decoration: BoxDecoration(
-                                color: SHColors.error(context).withOpacity(0.10),
+                                color: SHColors.error(context).withValues(alpha: 0.10),
                                 borderRadius: BorderRadius.circular(10.r),
                               ),
                               child: Icon(Icons.logout_rounded,

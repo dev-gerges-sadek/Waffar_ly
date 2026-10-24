@@ -1,6 +1,6 @@
-// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:waffar_ly_app/core/l10n/app_localizations.dart';
 import 'package:waffar_ly_app/core/theme/sh_colors.dart';
 import 'package:waffar_ly_app/core/theme/sh_icons.dart';
 import 'room_search_sheet.dart';
@@ -39,6 +39,7 @@ class ShAppBar extends StatelessWidget implements PreferredSizeWidget {
             isDark:      isDark,
             icon:        Icon(SHIcons.menu, color: iconColor),
             onTap:       onMenuTap ?? () {},
+            tooltip:     MaterialLocalizations.of(context).openAppDrawerTooltip,
           ),
         ),
       ),
@@ -53,6 +54,7 @@ class ShAppBar extends StatelessWidget implements PreferredSizeWidget {
               isDark:      isDark,
               icon:        Icon(SHIcons.search, color: iconColor),
               onTap:       () => _showRoomSearch(context),
+              tooltip:     MaterialLocalizations.of(context).searchFieldLabel,
             ),
           ),
         ),
@@ -67,6 +69,7 @@ class ShAppBar extends StatelessWidget implements PreferredSizeWidget {
                 isDark:      isDark,
                 icon:        Icon(SHIcons.settings, color: iconColor),
                 onTap:       onSettingsTap ?? () {},
+                tooltip:     AppLocalizations.of(context).settings,
               ),
             ),
           ),
@@ -97,8 +100,10 @@ class _AppBarButton extends StatelessWidget {
     required this.isDark,
     required this.icon,
     required this.onTap,
+    required this.tooltip,
   });
 
+  final String tooltip;
   final Color bgColor, shadowColor;
   final bool  isDark;
   final Icon  icon;
@@ -113,7 +118,7 @@ class _AppBarButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color:     shadowColor.withOpacity(isDark ? 0.3 : 0.08),
+            color:     shadowColor.withValues(alpha: isDark ? 0.3 : 0.08),
             blurRadius: 8,
           ),
         ],
@@ -122,6 +127,8 @@ class _AppBarButton extends StatelessWidget {
         onPressed: onTap,
         icon:      icon,
         iconSize:  24.sp,
+        tooltip:   tooltip,
+        constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
       ),
     );
   }
@@ -149,6 +156,7 @@ class ShBackAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation:       0,
       backgroundColor: Colors.transparent,
       leading: IconButton(
+        tooltip: MaterialLocalizations.of(context).backButtonTooltip,
         icon: Icon(
           isRtl
               ? Icons.arrow_forward_ios_outlined
@@ -166,5 +174,5 @@ class ShBackAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => Size(double.infinity, kToolbarHeight);
+  Size get preferredSize => const Size(double.infinity, kToolbarHeight);
 }

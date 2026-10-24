@@ -1,4 +1,3 @@
-// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core.dart';
@@ -10,7 +9,7 @@ class SHDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDarkMode   = Theme.of(context).brightness == Brightness.dark;
     final dividerColor = isDarkMode
-        ? SHColors.darkDividerColor.withOpacity(0.3)
+        ? SHColors.darkDividerColor.withValues(alpha: 0.3)
         : SHColors.lightDividerColor;
 
     return DecoratedBox(

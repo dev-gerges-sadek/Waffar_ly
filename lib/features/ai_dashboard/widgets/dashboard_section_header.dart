@@ -4,8 +4,8 @@
 // subtitle / action button. Used throughout the dashboard body.
 // ============================================================================
 
-// ignore_for_file: deprecated_member_use
 
+import '../../../core/widgets/tap_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -44,7 +44,7 @@ class DashboardSectionHeader extends StatelessWidget {
             Container(
               padding: EdgeInsetsDirectional.symmetric(horizontal: 8.w, vertical: 5.h),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.12),
+                color: color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8.r),
               ),
               child: Row(
@@ -69,14 +69,14 @@ class DashboardSectionHeader extends StatelessWidget {
 
             // Optional action button
             if (actionLabel != null && onAction != null)
-              GestureDetector(
+              TapButton(
                 onTap: onAction,
                 child: Container(
                   padding: EdgeInsetsDirectional.symmetric(horizontal: 8.w, vertical: 4.h),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.08),
+                    color: color.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(8.r),
-                    border: Border.all(color: color.withOpacity(0.20)),
+                    border: Border.all(color: color.withValues(alpha: 0.20)),
                   ),
                   child: Text(
                     actionLabel!,

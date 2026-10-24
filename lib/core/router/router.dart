@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../features/auth/signin/signin_screen.dart';
 import '../../features/auth/signup/sign_up_screen.dart';
@@ -14,7 +15,14 @@ abstract class AppRouter {
   static const String home    = '/home';
   static const String music   = '/music';
 
+  /// Routes that require a signed-in user.
+  static const _protected = {home, music};
+
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
+    if (_protected.contains(settings.name) &&
+        FirebaseAuth.instance.currentUser == null) {
+      return _fade(const SignInScreen());
+    }
     switch (settings.name) {
       case splash:
         return _fade(const SplashScreen());

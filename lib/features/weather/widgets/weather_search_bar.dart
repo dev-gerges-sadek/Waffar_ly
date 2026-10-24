@@ -1,3 +1,4 @@
+import '../../../core/widgets/tap_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -67,7 +68,7 @@ class _WeatherSearchBarState extends State<WeatherSearchBar> {
             ),
           ),
           SizedBox(width: 8.w),
-          GestureDetector(
+          TapButton(
             onTap: _search,
             child: Container(
               padding: EdgeInsets.all(10.w),

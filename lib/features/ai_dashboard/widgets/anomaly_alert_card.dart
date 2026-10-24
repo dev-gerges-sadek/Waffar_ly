@@ -5,7 +5,6 @@
 // Hides itself (SizedBox.shrink) when result is not an anomaly.
 // ============================================================================
 
-// ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -37,12 +36,12 @@ class AnomalyAlertCard extends StatelessWidget {
       margin: EdgeInsetsDirectional.only(bottom: 10.h),
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        color: color.withOpacity(isDark ? 0.12 : 0.07),
+        color: color.withValues(alpha: isDark ? 0.12 : 0.07),
         borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(color: color.withOpacity(0.45), width: 1.5),
+        border: Border.all(color: color.withValues(alpha: 0.45), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.15),
+            color: color.withValues(alpha: 0.15),
             blurRadius: 18,
             offset: const Offset(0, 5),
           ),
@@ -57,7 +56,7 @@ class AnomalyAlertCard extends StatelessWidget {
               Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.18),
+                  color: color.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(10.r),
                 ),
                 child: Icon(
@@ -110,13 +109,13 @@ class AnomalyAlertCard extends StatelessWidget {
             width: double.infinity,
             padding: EdgeInsets.all(10.w),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.06),
+              color: color.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: color.withOpacity(0.18)),
+              border: Border.all(color: color.withValues(alpha: 0.18)),
             ),
             child: Text(
               result.severity.recommendation(
-                l10n.isArabic,
+                l10n,
                 result.watts,
                 result.amperes,
               ),
@@ -172,12 +171,12 @@ class _SeverityBadge extends StatelessWidget {
     return Container(
       padding: EdgeInsetsDirectional.symmetric(horizontal: 10.w, vertical: 5.h),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.14),
+        color: color.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: color.withOpacity(0.4)),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Text(
-        severity.localLabel(l10n.isArabic),
+        severity.localLabel(l10n),
         style: TextStyle(
           fontSize: 10.sp,
           fontWeight: FontWeight.w800,
@@ -230,7 +229,7 @@ class _ProbabilityRow extends StatelessWidget {
           child: LinearProgressIndicator(
             value: probAnomaly / 100,
             minHeight: 8.h,
-            backgroundColor: SHColors.lightSeverityNormal.withOpacity(0.25),
+            backgroundColor: SHColors.lightSeverityNormal.withValues(alpha: 0.25),
             valueColor: AlwaysStoppedAnimation(color),
           ),
         ),
@@ -285,9 +284,9 @@ class _Chip extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: EdgeInsetsDirectional.symmetric(horizontal: 8.w, vertical: 4.h),
     decoration: BoxDecoration(
-      color: color.withOpacity(0.10),
+      color: color.withValues(alpha: 0.10),
       borderRadius: BorderRadius.circular(8.r),
-      border: Border.all(color: color.withOpacity(0.25)),
+      border: Border.all(color: color.withValues(alpha: 0.25)),
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
